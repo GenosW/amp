@@ -8,13 +8,19 @@ Exercises are from book version 2.
 
 Homework 1:
 
-    - Exercises: 6, 7, 8, 9, 10, 11, 12, 13, 15, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 46 from the Herlihy/Shavit book.
+    - Done: 6, 7, 8, 9, 10, 11, 12, 13, 15, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 46 from the Herlihy/Shavit book.
+
+    - Deadline: 02.04.2020, 23:59
+
+    - Submitted: 02.04.2020, 20:00
 
 Homework 2:
 
-    - Exercises 21, 22, 23, 24, 27, 32, 52 (hint: see 58), 53, 54, 59, 65 (hint: see 52) from the Herlihy/Shavit book
+    - Done: 21, 22, 23, 24, 27, 32, 52 (hint: see 58), 53, 54, 59, 65(hint: see 52) from the Herlihy/Shavit book.
 
-More notes on exercises in <amp-exercises-notes.md>
+    - Deadline: 09.04.2020, 23:30
+
+    - Submitted: 09.04.2020, 20:00
 
 ## Lectures
 
