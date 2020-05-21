@@ -19,3 +19,9 @@ lock, simple test-and-test-and-set lock
 
 * Challenge: Memory behavior. Ensure that memory (register)
 updates become visible in required order!
+
+## 1) Lamport's Bakery
+
+A mutual exclusion with stronger fairness guarantees (firstcome-first-served, FIFO, …)
+
+Idea: Take a ticket that is larger than the ones already in the bakery (or having been served); wait until my ticket is smallest.
