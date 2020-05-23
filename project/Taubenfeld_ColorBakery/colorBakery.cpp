@@ -1,5 +1,5 @@
 
-#include  <stdio.h>
+#include <stdio.h>
 #include <omp.h>
 #include <algorithm> // for the std::max() function
 #include <math.h>
@@ -67,6 +67,7 @@ class Bakery {
 		int acquired;
 		int *acquirers;
 
+	public: Bakery(){}
 	// constructor
 	public: Bakery(int n, int test_size) {
 		size = n;
@@ -134,11 +135,112 @@ class Bakery {
 	}	
 };
 
-class ColorBakery: public Bakery {
+class BWTicket { 
+	public: 
+		bool color;
+		int number; 
+
+		BWTicket();
+		// constructor
+		BWTicket(bool c, int num){
+			color = c;
+			number = num;
+		}
+	
+		// Member Functions() 
+		void printTicket() 
+		{ 
+			printf("Ticket(%u, %u)\n", color, number); 
+		} 
+}; 
+
+class BWBakery: public Bakery {
 	private:
-		bool *flag;
-		int *label; // unbounded integer label
+		volatile bool *color;
+		volatile bool *choosing;
+		BWTicket *tickets; // unbounded integer label
 		int size;
+
+	public: 
+		BWBakery();
+		BWBakery(int n, int test_size) {
+			size = n;
+			*color = false; // Starting value is arbitrary
+			choosing = new bool[n];
+			tickets = new BWTicket[n];
+			// from parent class
+			dw_completed = 0;
+			dw_completers = new int[n*test_size];
+			acquired = 0;
+			acquirers = new int[n*test_size];
+
+			for	(int i =0; i < n; i ++){
+				choosing[i] = false;
+				tickets[i].color = false;
+				tickets[i].number = 0;
+			}
+		};
+
+	private: 
+		int take_ticket(int j){
+			tickets[j].color = *color;
+			bool my_color = tickets[j].color;
+			int new_number = 0;
+			for (int i = 0; i < size; i++){
+				if (tickets[i].color == my_color) {
+					new_number = std::max(new_number, tickets[i].number);
+				}
+			}	
+			return new_number + 1;
+		}
+	
+		bool keep_waiting(int id){
+			bool kw = false;
+			for (int i = 0; i < size; i++){
+				while (! choosing[i]){} // wait until it is done choosing
+				if (tickets[i].number || (lex_lesser_than2(label[i],i,label[id],id))){
+					kw = true;
+				}
+				else if (/* condition */)
+				{
+					/* code */
+				}
+				
+			}
+			return kw;
+		}
+	
+	public: void lock(int id){
+		#ifdef LOCK_MSG
+			printf("thread %i TRIES to acquire the lock\n",id);
+		#endif
+
+		flag[id] = true;
+		label[id] = take_ticket();
+
+		#ifdef LOCK_MSG
+			printf("flag[%i] = %i, label[%i] = %i\n",id,flag[id],id,label[id]);
+		#endif
+
+		dw_completers[dw_completed] = id;
+		dw_completed += 1;
+
+		while ( keep_waiting(id) ) {}
+
+		acquirers[acquired] = id;
+		acquired += 1;
+		#ifdef LOCK_MSG
+			printf("thread %i ACQUIRES the lock\n",id);
+		#endif
+	}
+	
+	public: void unlock(int id){
+		#ifdef LOCK_MSG
+			printf("thread %i UNLOCKS\n",id);
+		#endif
+
+		flag[id] = false;	
+	}	
 }
 
 void do_some_work(int workload){
