@@ -1,4 +1,3 @@
-#pragma once
 #include  <stdio.h>
 #include <omp.h>
 #include <math.h>
@@ -211,12 +210,20 @@ bool test_fcfs(DW_Lock* test_lock, int num_threads,
 	return fcfs;
 }
 
+/**
+ * ./project2 num_threads num_turns num_tests 
+ */
+int main(int argc, char *argv[]){
 
-int main(){
-
-	int num_threads = 4;
+	int num_threads = convertTo<int>(1, 2, argc, argv);
 	// how many times does every thread need to pass through critical section
-	int num_turns = 100;
+	int num_turns = convertTo<int>(2, 2, argc, argv);
+	int num_tests = convertTo<int>(3, 10, argc, argv);
+
+	printf("num_threads: %i\n", num_threads);
+	printf("num_turns: %i\n", num_turns);
+	// int adummy;
+	// cin >> adummy;
 
 	// amount of work in the critical/noncritical section
 	int workload = int(1e3);
@@ -233,40 +240,50 @@ int main(){
 	//Lamport_Lecture_fix my_lock{ num_threads };
 	//Lamport_Original my_lock{ num_threads };
 	//Reference_Lock my_lock;
-	Taubenfeld my_lock{ num_threads};
 
-	int num_tests = 1000;
+	printf("Main: Init taubi\n");
+	Taubenfeld my_lock{num_threads};
+
 	bool test_mutex_switch = true;
 	bool test_fcfs_switch = true;
 
 	printf("num_threads = %d\n", num_threads);
 	printf("num_tests = %d\n", num_tests);
 
+
+	int mutex_fail_count = -1;
 	if (test_mutex_switch) {
-		int mutex_fail_count = 0;
+		mutex_fail_count = 0;
 		for (int i = 0; i < num_tests; i++) {
 			mutex_fail_count += (1 - test_mutex(&my_lock,
 				num_threads,
 				num_turns,
 				workload,
-				randomness)
+				randomness,
+				true)
 				);
 		}
-		printf("mutex_fail_count = %d\n", mutex_fail_count);
 	}
 
+	printf("\n----------------------\n");
+
+	int fcfs_fail_count = -1;
 	if (test_fcfs_switch) {
-		int fcfs_fail_count = 0;
+		fcfs_fail_count = 0;
 		for (int i = 0; i < num_tests; i++) {
 			fcfs_fail_count += (1 - test_fcfs(&my_lock,
 				num_threads,
 				num_turns,
 				workload,
-				randomness)
+				randomness,
+				true)
 				);
 		}
-		printf("fcfs_fail_count = %d\n", fcfs_fail_count);
 	}
+
+	printf("\nResumé:\n");
+	printf("mutex_fail_count = %d\n", mutex_fail_count);
+	printf("fcfs_fail_count = %d\n", fcfs_fail_count);
 
 	//test_random_workload(30,1e5,.9);
 

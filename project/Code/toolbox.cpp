@@ -1,25 +1,30 @@
+#pragma once
 #include <stdio.h>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <tuple>
 
-class BWTicket
-{
-public:
-	bool color;
-	int number;
+using namespace std;
 
-	BWTicket();
-	// constructor
-	BWTicket(bool c, int num)
-	{
-		color = c;
-		number = num;
-	}
+template<typename T>
+T convertTo(const int position, const T init, int argc, char *argv[]) {
+  if (argc <= position) {
+    std::cout
+        << "Conversion of argument " << position
+        << " failed, not enough parameters, using default parameter: "
+        << init << std::endl;
+    return init;
+  }
+  T arg;
+  std::istringstream tmp(argv[position]);
+  tmp >> arg;
+  // tmp >> arg ?  (std::cout << "Conversion of argument " << position << "  successfull: " << arg)
+  //               : (std::cout << "Conversion of argument " << position
+  //                            << "  failed");
 
-	// Member Functions()
-	void printTicket()
-	{
-		printf("Ticket(%u, %u)\n", color, number);
-	}
-};
+  return arg;
+}
 
 template <typename myT>
 bool isequal(myT *array1, myT *array2, int length)
@@ -79,12 +84,14 @@ bool lex_lesser_than2(myT a1, myT2 a2, myT b1, myT2 b2)
 	return false;
 }
 
-template <typename myT, typename myT2>
-bool lex_geq(myT a1, myT2 a2, myT b1, myT2 b2)
+
+/** (a1, a2, a3) >= (b1, b2, b3)
+ * 
+ * lexicographic comparison for 2 tuples 
+ */
+template <typename myT, typename myT2, typename myT3>
+bool lex_geq(myT a1, myT2 a2, myT3 a3, myT b1, myT2 b2, myT3 b3)
 {
-	/* (a1, a2) >= (b1, b2)
-	
-	lexicographic comparison for 4 elements */
 	if (a1 > b1)
 		return true;
 	if (a1 < b1)
@@ -95,5 +102,7 @@ bool lex_geq(myT a1, myT2 a2, myT b1, myT2 b2)
 	if (a2 < b2)
 		return false;
 	// If here: (a1, a2) == (b1, b2)
-	return true;
+	if (a3 >= b3)
+		return true;
+	return false;
 }

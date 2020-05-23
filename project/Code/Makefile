@@ -1,9 +1,10 @@
 PROG = project2
 OBJECTS = main.cpp
 PREREQ = main.cpp locks.cpp toolbox.cpp Makefile
-CC = g++
+CXX = g++
+#CXX = clang
 
-FLAGS = -Wall -fopenmp -std=c++11
+FLAGS = -Wall -std=c++11 -Xpreprocessor -fopenmp -lomp
 # optimization flags are dangerous here
 # -O1 and -O3 will break Lamport_Original
 #FLAGS = -Wall -fopenmp -O3
@@ -11,8 +12,9 @@ FLAGS = -Wall -fopenmp -std=c++11
 all: $(PROG)
 
 $(PROG): $(PREREQ)
-	$(CC) $(OBJECTS) $(FLAGS) -o $@
+	$(CXX) $(OBJECTS) $(FLAGS) -g -o $@
 
+.PHONY: clean
 clean:
 	rm $(PROG)
 

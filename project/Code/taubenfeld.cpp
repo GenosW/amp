@@ -1,5 +1,15 @@
 #include "locks.hpp"
 
+//#define LOCK_MSG
+
+struct BWTicket
+{
+	bool color;
+	int number;
+
+	BWTicket(){};
+};
+
 /**
  * Black-White Bakery lock as developed by Taubenfeld, 2004.
  * 
@@ -19,26 +29,38 @@ class Taubenfeld : public DW_Lock
 private:
 	volatile bool *color;
 	volatile bool *choosing;
-	BWTicket *tickets; // unbounded integer label
+	// volatile std::atomic_bool *color;
+	// volatile std::atomic_bool *choosing;
+	volatile BWTicket *tickets; // unbounded integer label
+	volatile bool inCS;
 	int size;
-	int fail;
+	//int fail;
 
 public:
-	Taubenfeld();
+	//Taubenfeld();
 	Taubenfeld(int n)
 	{
 		//fail = crash;
 		size = n;
-		*color = false; // Starting value is arbitrary
+		inCS = false;
+		color = new bool; // Starting value is arbitrary
 		choosing = new bool[n];
+		// color = new std::atomic_bool; // Starting value is arbitrary
+		// choosing = new std::atomic_bool[n];
 		tickets = new BWTicket[n];
 
+		*color = false;
 		for (int i = 0; i < n; i++)
 		{
 			choosing[i] = false;
 			tickets[i].color = false;
 			tickets[i].number = 0;
 		}
+	};
+	~Taubenfeld()
+	{
+		delete[] choosing;
+		delete[] tickets;
 	};
 
 private:
@@ -51,7 +73,8 @@ private:
 		{
 			if (tickets[i].color == my_color)
 			{
-				new_number = std::max(new_number, tickets[i].number);
+				int ticket_number = tickets[i].number;
+				new_number = std::max(new_number, ticket_number);
 			}
 		}
 		return new_number + 1;
@@ -71,7 +94,7 @@ public:
 		choosing[id] = true;
 
 #ifdef LOCK_MSG
-		printf("(mycolor, number)[%i] = %i\n", id, tickets[id].color, tickets[id].number);
+		printf("(mycolor, number)[%i] = (%i, %i)\n", id, tickets[id].color, tickets[id].number);
 #endif
 	}
 
@@ -79,32 +102,36 @@ public:
 	{
 		int id = omp_get_thread_num();
 
-		for (int i = 0; i < size; i++)
+		for (int j = 0; j < size; j++)
 		{
-			while (!choosing[i])
+			if (j != id)
 			{
-			} // wait until it is done choosing
-			if (tickets[i].color == tickets[id].color)
-			{
-				while (!(tickets[i].number == 0 || lex_geq(tickets[i].color, tickets[i].number, tickets[id].color, tickets[id].number) || tickets[i].color != tickets[id].color))
-				{ /*wait*/
+				while (!choosing[j])
+				{
+				} // wait until it is done choosing
+				if (tickets[j].color == tickets[id].color)
+				{
+					// while (! (tickets[j].number == 0 || lex_geq(tickets[j].color, tickets[j].number, tickets[id].color, tickets[id].number) || tickets[j].color != tickets[id].color) )
+					while (!(tickets[j].number == 0 || lex_geq(tickets[j].color, tickets[j].number, j, tickets[id].color, tickets[id].number, id) || tickets[j].color != tickets[id].color))
+					{ /*wait*/
+					}
 				}
-			}
-			else
-			{
-				while (!(tickets[i].number == 0 || tickets[id].color != *color || tickets[i].color == tickets[id].color))
-				{ /*wait*/
+				else
+				{
+					while (!(tickets[j].number == 0 || tickets[id].color != *color || tickets[j].color == tickets[id].color))
+					{ /*wait*/
+					}
 				}
 			}
 		}
-#ifdef LOCK_MSG
-		printf("thread %i ACQUIRES the lock\n", id);
-#endif
+		inCS = true;
+		//#ifdef LOCK_MSG
+		//printf("thread %i ACQUIRES the lock\n", id);
+		//#endif
 	}
 
 	void lock()
 	{
-		int id = omp_get_thread_num();
 		doorway();
 		wait();
 	}
@@ -112,10 +139,15 @@ public:
 	void unlock()
 	{
 		int id = omp_get_thread_num();
-#ifdef LOCK_MSG
-		printf("thread %i UNLOCKS\n", id);
-#endif
-		*color = !*color;		// Flip color
+		// #ifdef LOCK_MSG
+		//printf("thread %i UNLOCKS\n", id);
+		// #endif
+		//*color = !*color;		// Flip color
+		if (tickets[id].color == false)
+			*color = true;
+		else
+			*color = false;
 		tickets[id].number = 0; // Set ticket number to zero
+		inCS = false;
 	}
 };
