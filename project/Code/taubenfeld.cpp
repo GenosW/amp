@@ -25,9 +25,9 @@ private:
 
 public:
 	Taubenfeld();
-	Taubenfeld(int n, int test_size, int crash)
+	Taubenfeld(int n)
 	{
-		fail = crash;
+		//fail = crash;
 		size = n;
 		*color = false; // Starting value is arbitrary
 		choosing = new bool[n];

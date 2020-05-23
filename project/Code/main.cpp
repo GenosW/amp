@@ -230,9 +230,10 @@ int main(){
 
 	// this is now my preferred way to instanciate locks
 	//Lamport_Lecture my_lock {num_threads};
-	Lamport_Lecture_fix my_lock{ num_threads };
+	//Lamport_Lecture_fix my_lock{ num_threads };
 	//Lamport_Original my_lock{ num_threads };
 	//Reference_Lock my_lock;
+	Taubenfeld my_lock{ num_threads};
 
 	int num_tests = 1000;
 	bool test_mutex_switch = true;
