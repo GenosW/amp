@@ -27,9 +27,11 @@ struct BWTicket
 class Taubenfeld : public DW_Lock
 {
 protected:
-	string name = "Taubenfeld";
+	string lock_name;
 	volatile bool *color;
 	volatile bool *choosing;
+	// volatile std::atomic_bool *color;
+	// volatile std::atomic_bool *choosing;
 	volatile BWTicket *tickets; // unbounded integer label
 	volatile bool inCS;
 	int size;
@@ -39,11 +41,14 @@ public:
 	//Taubenfeld();
 	Taubenfeld(int n)
 	{
+		lock_name = "Taubenfeld";
 		//fail = crash;
 		size = n;
 		inCS = false;
 		color = new bool; // Starting value is arbitrary
 		choosing = new bool[n];
+		// color = new std::atomic_bool; // Starting value is arbitrary
+		// choosing = new std::atomic_bool[n];
 		tickets = new BWTicket[n];
 
 		*color = false;
@@ -54,14 +59,17 @@ public:
 			tickets[i].number = 0;
 		}
 	};
-	Taubenfeld(int n, string lock_name)
+
+	Taubenfeld(int n, string name)
 	{
-		name = lock_name;
+		lock_name = name;
 		//fail = crash;
 		size = n;
 		inCS = false;
 		color = new bool; // Starting value is arbitrary
 		choosing = new bool[n];
+		// color = new std::atomic_bool; // Starting value is arbitrary
+		// choosing = new std::atomic_bool[n];
 		tickets = new BWTicket[n];
 
 		*color = false;
@@ -72,11 +80,13 @@ public:
 			tickets[i].number = 0;
 		}
 	};
+
 	~Taubenfeld()
 	{
-		printf("Deleting %s...\n", name.c_str());
 		delete[] choosing;
 		delete[] tickets;
+
+		printf("\n%s destroyed!\n", lock_name.c_str());
 	};
 
 private:
@@ -86,18 +96,42 @@ private:
 		int new_number = 0;
 		for (int i = 0; i < size; i++)
 		{
-			if (tickets[i].color == tickets[id].color)
+			if (tickets[i].color == tickets[id].color) // && i != j)
 			{
+				// while( choosing[i])
+				// {
+				// 	// wait
+				// }
 				int ticket_number = tickets[i].number;
 				new_number = std::max(new_number, ticket_number);
 			}
 		}
-		tickets[id].number = new_number + 1;
+		tickets[id].number = ++new_number;
+	}
+
+	bool keep_waiting_same_color(int id, int j)
+	{
+		// bool num_not_zero = (tickets[j].number != 0);
+		// bool lex_id_geq_j = lex_geq(tickets[id].color, tickets[id].number, id, tickets[j].color, tickets[j].number, j); 
+		// bool same_color = (tickets[j].color == tickets[id].color);
+		// return num_not_zero && lex_id_geq_j && same_color;
+		bool num_zero = (tickets[j].number == 0);
+		bool lex_j_geq_id = lex_geq(tickets[j].color, tickets[j].number, j, tickets[id].color, tickets[id].number, id); 
+		bool not_same_color = (tickets[j].color != tickets[id].color);
+		return !(num_zero || lex_j_geq_id || not_same_color);
+	}
+
+	bool keep_waiting_different_color(int id, int j)
+	{
+		bool num_zero = (tickets[j].number == 0);
+		bool lock_color_change = (tickets[id].color != *color); 
+		bool ticket_color_change = (tickets[j].color == tickets[id].color);
+		return !(num_zero || lock_color_change || ticket_color_change);
 	}
 
 	virtual void reset_ticket(int id)
 	{
-		tickets[id].number = 0; // Set ticket number to zero
+		tickets[id].number = 0;
 	}
 
 public:
@@ -111,7 +145,7 @@ public:
 
 		choosing[id] = true;
 		take_ticket(id); // Ticket is colored inside function
-		choosing[id] = false;
+		choosing[id] = true;
 
 #ifdef LOCK_MSG
 		printf("(mycolor, number)[%i] = (%i, %i)\n", id, tickets[id].color, tickets[id].number);
@@ -124,23 +158,23 @@ public:
 
 		for (int j = 0; j < size; j++)
 		{
-			if (j != id)
+			while (choosing[j])
 			{
-				while (choosing[j])
-				{
-				} // wait until it is done choosing
-				if (tickets[j].color == tickets[id].color)
-				{
-					// while (! (tickets[j].number == 0 || lex_geq(tickets[j].color, tickets[j].number, tickets[id].color, tickets[id].number) || tickets[j].color != tickets[id].color) )
-					while (!(tickets[j].number == 0 || lex_geq(tickets[j].color, tickets[j].number, j, tickets[id].color, tickets[id].number, id) || tickets[j].color != tickets[id].color))
-					{ /*wait*/
-					}
+				// wait until done choosing
+			}
+			if (tickets[j].color == tickets[id].color)
+			{
+				// while (! (tickets[j].number == 0 || lex_geq(tickets[j].color, tickets[j].number, tickets[id].color, tickets[id].number) || tickets[j].color != tickets[id].color) )
+				while (!(tickets[j].number == 0 || lex_geq(tickets[j].color, tickets[j].number, j, tickets[id].color, tickets[id].number, id) || tickets[j].color != tickets[id].color))
+				//while (keep_waiting_same_color(id, j))
+				{ /*wait*/
 				}
-				else
-				{
-					while (!(tickets[j].number == 0 || tickets[id].color != *color || tickets[j].color == tickets[id].color))
-					{ /*wait*/
-					}
+			}
+			else
+			{
+				while (!(tickets[j].number == 0 || tickets[id].color != *color || tickets[j].color == tickets[id].color))
+				//while (keep_waiting_different_color(id, j))
+				{ /*wait*/
 				}
 			}
 		}
@@ -168,6 +202,7 @@ public:
 		else
 			*color = false;
 		reset_ticket(id);
+		// tickets[id].number = 0; // Set ticket number to zero
 		inCS = false;
 	}
 };

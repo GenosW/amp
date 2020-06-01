@@ -2,228 +2,25 @@
 #include <omp.h>
 #include <math.h>
 #include <time.h>
+#include <assert.h>
 
-#include "locks.hpp" // lock implementations
+#include "tests.cpp"
+//#include "locks.hpp" // lock implementations
 //#include "toolbox.cpp" // helper functions are already included in locks.cpp
 
-#include <assert.h>
 
 // compiler switch to turn some debug-messages on
 //#define DEBUG
-
-void do_some_work(int workload, double randomness){
-	// does some work (workload * 3 flops)
-	// randomness in [0,1] is the portion of the workload
-	// that is randomized 0... full workload, 
-	//					0.5... workload between 50-100%
-	//					  1... workload between 0-100%
-
-	assert((0<=randomness) && (randomness <= 1));
-
-	double randy = (rand()%1000) / 1000.;
-	int rand_wl = int(((1-randomness) + randomness*randy) * workload);
-
-	double dummy = 1.23;
-
-	#ifdef DEBUG
-		int id = omp_get_thread_num();
-		printf("id = %d, rand_wl = %d\n",id,rand_wl);
-	#endif
-
-	for (int i = 0; i < rand_wl; i++){
-		dummy = dummy + dummy;
-		dummy = dummy + 1e-10;
-		dummy = dummy / 2;
-	}
-}
-
-
-// all tests should end up in their own module
-// ----------------------------------------------
-bool test_mutex(Lock* test_lock, int num_threads, 
-					int num_turns, int workload, double randomness, 
-					bool print_to_console = false)
-{
-	// this tests the mutual exclusion property of a lock
-	// returns true if mutual exclusion held true, false otherwise
-	// test_lock ... lock object, to be tested
-	// num_threads ... number of threads for the test
-	// num_turns ... number of times each thread executes the CS
-	// randomness ... number in [0,1] to randomize workload of 
-	//					work in non-CS
-	// print_to_console ... console output on/off
-
-	omp_set_num_threads(num_threads);
-
-	// counter keeps track of the logging position
-	int counter = 0;
-	// an event is acquisition of a lock or unlocking
-	int num_events = num_threads * num_turns * 2;
-	int* event_log = new int[num_events];
-
-	//initialize logging array
-	for (int i = 0; i < num_events; i++) event_log[i] = -1;
-
-	// our lock for testing the test_lock object
-	std::atomic_flag lock_stream = ATOMIC_FLAG_INIT;	
-
-	// seeds for randomizing the workload
-	int* random_seeds = new int[num_threads];
-	srand( time(NULL) );
-	for (int i = 0; i < num_threads;i++){
-		random_seeds[i] = rand();
-	}
-
-	// do the test
-	//----------------
-	#pragma omp parallel
-	{
-		int thread_id = omp_get_thread_num();
-		
-		// create a thread-specific random sequence 
-		srand( random_seeds[thread_id] );
-
-		for (int i = 0; i < num_turns; i++){
-
-			test_lock->lock();
-
-			// atomic logging, that the cs has been entered
-			while ( lock_stream.test_and_set() ) {}
-			event_log[counter] = 1; // cs has been entered
-			counter++;
-			lock_stream.clear();
-
-			do_some_work(int(0.01*workload),0);// critical section
-
-			// atomic releasing and logging, cs has been left
-			while ( lock_stream.test_and_set() ) {}
-			test_lock->unlock();		// unlock
-			event_log[counter] = 0;		// cs has been left
-			counter++;
-			lock_stream.clear();
-
-			do_some_work(workload,randomness);// noncritical section
-		}
-	}
-
-	// evaluate event_log
-	bool mutex = true;
-	// make sure that it is a sequence of entering and leaving the cs
-	for (int i = 0; i < num_events; i += 2) {
-		if ((event_log[i] != 1) || (event_log[i + 1] != 0))
-		{
-			mutex = false;
-		}
-	}
-
-	//output results
-	//----------------
-	if (print_to_console) {
-		printf("lock acquisitions + lock releases = %d\n", counter);
-		print_array(event_log, num_threads * 2, num_turns);
-		printf("mutex = %d\n", mutex);
-	}
-	return mutex;
-}
-
-
-bool test_fcfs(DW_Lock* test_lock, int num_threads, 
-				int num_turns, int workload, double randomness, 
-				bool print_to_console = false)
-{
-	// this tests the fcfs property of a lock
-	// returns true if fcfs held true, false otherwise
-	// test_lock ... DW_Lock object, to be tested
-	// num_threads ... number of threads for the test
-	// num_turns ... number of times each thread executes the CS
-	// randomness ... number in [0,1] to randomize workload of 
-	//					work in non-CS
-	// print_to_console ... console output on/off
-
-	// FCFS according to Herlihy: whenever a thread A completes its
-	// doorway before B starts its doorway, A gets in the CS before B.
-	// to test this, the doorway section is made mutually exclusive
-
-	//  initialize
-	//----------------
-	omp_set_num_threads(num_threads);
-	// keep track of doorway completing threads
-	int dw_completed = 0;
-	int* dw_completers = new int[num_threads*num_turns];
-	// keep track of lock acquiring threads
-	int acquired = 0;
-	int* acquirers = new int[num_threads*num_turns];
-	
-	// the whole doorway is made mutually exclusive
-	Reference_Lock mutex_doorway;
-	
-	// seeds for randomizing the workload
-	int* random_seeds = new int[num_threads];
-	srand( time(NULL) );
-	for (int i = 0; i < num_threads;i++){
-		random_seeds[i] = rand();
-	}
-
-	// do the test
-	//----------------
-	#pragma omp parallel
-	{
-		int thread_id = omp_get_thread_num();
-		
-		// create a thread-specific random sequence 
-		srand( random_seeds[thread_id] );
-
-		for (int i = 0; i < num_turns; i++){
-
-			mutex_doorway.lock();
-
-			test_lock->doorway();
-			dw_completers[dw_completed] = thread_id;
-			dw_completed += 1;
-			mutex_doorway.unlock();
-
-			test_lock->wait();// waiting section
-			acquirers[acquired] = thread_id;
-			acquired += 1;
-			
-			do_some_work(int(0.01*workload),0);// critical section
-			test_lock->unlock();		// unlock
-
-			do_some_work(workload,randomness);// noncritical section
-		}
-	}
-
-	// evaluate
-	bool fcfs = isequal(dw_completers, acquirers, num_threads*num_turns);
-
-	//output results
-	//----------------
-	if (print_to_console) {
-		printf("dw_completed = %d\n", dw_completed);
-		printf("acquired = %d\n", acquired);
-		printf("dw_completers = \n");
-		print_array(dw_completers, num_threads, num_turns);
-		printf("acquirers = \n");
-		print_array(acquirers, num_threads, num_turns);
-		printf("FCFS = %d\n", fcfs);
-	}
-	return fcfs;
-}
 
 /**
  * ./project2 num_threads num_turns num_tests 
  */
 int main(int argc, char *argv[]){
 
-	int num_threads = convertTo<int>(1, 2, argc, argv);
+	int num_threads = convertTo<int>(1, 4, argc, argv);
 	// how many times does every thread need to pass through critical section
 	int num_turns = convertTo<int>(2, 2, argc, argv);
 	int num_tests = convertTo<int>(3, 10, argc, argv);
-
-	printf("num_threads: %i\n", num_threads);
-	printf("num_turns: %i\n", num_turns);
-	// int adummy;
-	// cin >> adummy;
 
 	// amount of work in the critical/noncritical section
 	int workload = int(1e3);
@@ -235,21 +32,48 @@ int main(int argc, char *argv[]){
 	//Lamport_Lecture* my_lock = new Lamport_Lecture{num_threads};
 	//DW_Lock* my_lock = new Lamport_Lecture{num_threads};
 
-	// this is now my preferred way to instanciate locks
-	//Lamport_Lecture my_lock {num_threads};
-	//Lamport_Lecture_fix my_lock{ num_threads };
-	//Lamport_Original my_lock{ num_threads };
-	//Reference_Lock my_lock;
+	string lock_class, lock_version;
+	// --- Lamport
+	//lock_class = "Lamport";
+	// Lamport_Lecture my_lock {num_threads}; lock_version = "Lecture";
+	//Lamport_Lecture_fix my_lock{ num_threads }; lock_version = "Fix1";
+	//Lamport_Original my_lock{ num_threads }; lock_version = "Original";
 
-	printf("Main: Init taubi\n");
-	Taubenfeld my_lock{num_threads};
+	// --- Taubenfeld
+	lock_class = "Taubenfeld";
+	Taubenfeld my_lock{num_threads}; lock_version = "Paper v1";
+	//Taubenfeld_fix my_lock{num_threads}; lock_version = "Fix1";
+
+	// --- Szymansky
+	//lock_class = "Szymansky";
+
+	// --- Aravind
+	//lock_class = "Aravind";
+
+	// C++ Reference Lock
+	//lock_class = "Reference";
+	//Reference_Lock my_lock; lock_version = "C++11"
+	
 
 	bool test_mutex_switch = true;
 	bool test_fcfs_switch = true;
 
+	printf("\nTesting lock: %s %s\n", lock_class.c_str(), lock_version.c_str());
+	printf("Performing mutex test: %d\n", test_mutex_switch);
+	printf("Performing FCFS test: %d\n", test_fcfs_switch);
 	printf("num_threads = %d\n", num_threads);
+	printf("num_turns = %d\n", num_turns);
 	printf("num_tests = %d\n", num_tests);
 
+	// * Make sure to comment this out for the cluster! *
+	char cont;
+	printf("Press ENTER to start tests...");
+	scanf("%c", &cont);
+	// * Make sure to comment this out for the cluster! *
+
+	printf("\n######################\n");
+	printf("#     MUTEX TEST     #");
+	printf("\n######################\n");
 
 	int mutex_fail_count = -1;
 	if (test_mutex_switch) {
@@ -266,6 +90,9 @@ int main(int argc, char *argv[]){
 	}
 
 	printf("\n----------------------\n");
+	printf("\n######################\n");
+	printf("#     FCFS TEST      #");
+	printf("\n######################\n");
 
 	int fcfs_fail_count = -1;
 	if (test_fcfs_switch) {
@@ -281,11 +108,17 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-	printf("\nResumé:\n");
+	printf("\n----------------------\n");
+	printf("\n######################\n");
+	printf("#       RESUMÉ       #");
+	printf("\n######################\n");
+	printf("Lock: %s %s\n", lock_class.c_str(), lock_version.c_str());
 	printf("mutex_fail_count = %d\n", mutex_fail_count);
 	printf("fcfs_fail_count = %d\n", fcfs_fail_count);
 
 	//test_random_workload(30,1e5,.9);
+
+	printf("\n\nGarbage collection...\n");
 
 	return 0;	        
 }
