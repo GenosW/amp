@@ -39,16 +39,8 @@ private:
 
 public:
 	Reference_Lock();
-
-public:
 	void doorway();
-
-public:
 	void wait();
-
-public:
 	void lock();
-
-public:
 	void unlock();
 };
