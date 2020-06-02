@@ -2,19 +2,14 @@
 #include <omp.h>
 #include <math.h>
 #include <time.h>
-#include <assert.h>
-
-#include "locks.hpp"
-#include "lamport.hpp"
-#include "taubenfeld.hpp"
-#include "tests.hpp"
-#include "toolbox.hpp"
-//#include "locks.hpp" // lock implementations
-//#include "toolbox.cpp" // helper functions are already included in locks.cpp
-
-
 // compiler switch to turn some debug-messages on
 //#define DEBUG
+#include <assert.h>
+#include "locks.hpp" // basic lock interface + reference lock implementations
+#include "lamport.hpp" // implementation of lamport bakery locks
+#include "taubenfeld.hpp" // implementation of taubenfeld (black/white) bakery locks
+#include "tests.hpp" // lock tests (mutex, fcfs)
+#include "toolbox.hpp" // various helper functions
 
 /**
  * ./project2 num_threads num_turns num_tests 
@@ -36,22 +31,23 @@ int main(int argc, char *argv[]){
 	//Lamport_Lecture* my_lock = new Lamport_Lecture{num_threads};
 	//DW_Lock* my_lock = new Lamport_Lecture{num_threads};
 
-	string lock_class, lock_version;
-	// --- Lamport
-	//lock_class = "Lamport";
-	// Lamport_Lecture my_lock {num_threads}; lock_version = "Lecture";
+	// The 2 strings hold information on which Lock is being tested
+	string lock_class="<not-set>", lock_version="<not-set>";
+	//// --- Lamport
+	lock_class = "Lamport";
+	Lamport_Lecture my_lock {num_threads}; lock_version = "Lecture";
 	//Lamport_Lecture_fix my_lock{ num_threads }; lock_version = "Fix1";
 	//Lamport_Original my_lock{ num_threads }; lock_version = "Original";
 
-	// --- Taubenfeld
-	lock_class = "Taubenfeld";
-	Taubenfeld my_lock{num_threads}; lock_version = "Paper v1";
-	//Taubenfeld_fix my_lock{num_threads}; lock_version = "Fix1";
+	//// --- Taubenfeld
+	// lock_class = "Taubenfeld";
+	// //Taubenfeld my_lock{num_threads}; lock_version = "Paper v1";
+	// Taubenfeld_fix my_lock{num_threads}; lock_version = "Fix1";
 
-	// --- Szymansky
+	//// --- Szymansky
 	//lock_class = "Szymansky";
 
-	// --- Aravind
+	//// --- Aravind
 	//lock_class = "Aravind";
 
 	// C++ Reference Lock
@@ -62,6 +58,7 @@ int main(int argc, char *argv[]){
 	bool test_mutex_switch = true;
 	bool test_fcfs_switch = true;
 
+	// Quick print to console that shows the configuration of the benchmark
 	printf("\nTesting lock: %s %s\n", lock_class.c_str(), lock_version.c_str());
 	printf("Performing mutex test: %d\n", test_mutex_switch);
 	printf("Performing FCFS test: %d\n", test_fcfs_switch);
@@ -122,6 +119,9 @@ int main(int argc, char *argv[]){
 
 	//test_random_workload(30,1e5,.9);
 
+	// I coded the destructors to print a message when they are being called...
+	// just to make sure that and where they are being called.
+	// These messages should ONLY show after the following statement
 	printf("\n\nGarbage collection...\n");
 
 	return 0;	        

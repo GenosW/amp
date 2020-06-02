@@ -1,12 +1,15 @@
+# Ignore IDE settings
 .vscode
+# Ignore virtual environment folders (python)
 .env
+# Ignore Mac specific files
+*.DS_Store
 
+# Project specific
 # Ignore the build and lib dirs
 build/*
 lib/*
-
 # Ignore any executables
 bin/*
-
-# Ignore Mac specific files
-*.DS_Store
+# Ignore dSYM folder (debug symbols)
+*.dSYM
