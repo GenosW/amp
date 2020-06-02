@@ -10,6 +10,6 @@
 project/Code/build/*
 project/Code/lib/*
 # Ignore any executables
-*/bin/*
+project/Code/bin/*
 # Ignore dSYM folder (debug symbols)
 *.dSYM
