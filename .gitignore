@@ -7,8 +7,8 @@
 
 # Project specific
 # Ignore the build and lib dirs
-*/build/*
-*/lib/*
+project/Code/build/*
+project/Code/lib/*
 # Ignore any executables
 */bin/*
 # Ignore dSYM folder (debug symbols)
