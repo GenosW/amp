@@ -28,13 +28,15 @@ struct BWTicket
 class Taubenfeld : public DW_Lock
 {
 protected:
-	string name = "Taubenfeld";
 	volatile bool *color;
 	volatile bool *choosing;
 	volatile BWTicket *tickets; // unbounded integer label
 	volatile bool inCS;
 	int size;
 	//int fail;
+
+public:
+	string name = "Taubenfeld_Paper_1";
 
 public:
 	//Taubenfeld();
@@ -175,6 +177,9 @@ public:
 
 class Taubenfeld_fix : public Taubenfeld
 {
+public:
+	string name = "Taubenfeld_Paper_1_Fix";
+
 private:
 	std::atomic<int> latest_ticket_black; // false=black
 	std::atomic<int> latest_ticket_white; // true=white
@@ -184,6 +189,10 @@ public:
 	{
 		latest_ticket_black = 0;
 		latest_ticket_white = 0;
+	}
+	~Taubenfeld_fix()
+	{
+		printf("Deleting %s...\n", name.c_str());
 	}
 
 private:

@@ -34,15 +34,15 @@ int main(int argc, char *argv[]){
 	// The 2 strings hold information on which Lock is being tested
 	string lock_class="<not-set>", lock_version="<not-set>";
 	//// --- Lamport
-	lock_class = "Lamport";
-	Lamport_Lecture my_lock {num_threads}; lock_version = "Lecture";
+	// lock_class = "Lamport";
+	// Lamport_Lecture my_lock {num_threads}; lock_version = "Lecture";
 	//Lamport_Lecture_fix my_lock{ num_threads }; lock_version = "Fix1";
-	//Lamport_Original my_lock{ num_threads }; lock_version = "Original";
+	// Lamport_Original my_lock{ num_threads }; lock_version = "Original";
 
 	//// --- Taubenfeld
 	// lock_class = "Taubenfeld";
-	// //Taubenfeld my_lock{num_threads}; lock_version = "Paper v1";
-	// Taubenfeld_fix my_lock{num_threads}; lock_version = "Fix1";
+	// Taubenfeld my_lock{num_threads}; lock_version = "Paper v1";
+	Taubenfeld_fix my_lock{num_threads}; lock_version = "Fix1";
 
 	//// --- Szymansky
 	//lock_class = "Szymansky";
@@ -59,7 +59,8 @@ int main(int argc, char *argv[]){
 	bool test_fcfs_switch = true;
 
 	// Quick print to console that shows the configuration of the benchmark
-	printf("\nTesting lock: %s %s\n", lock_class.c_str(), lock_version.c_str());
+	// printf("\nTesting lock: %s %s\n", lock_class.c_str(), lock_version.c_str());
+	printf("\nTesting lock 2: %s\n", my_lock.name.c_str());
 	printf("Performing mutex test: %d\n", test_mutex_switch);
 	printf("Performing FCFS test: %d\n", test_fcfs_switch);
 	printf("num_threads = %d\n", num_threads);
@@ -113,7 +114,8 @@ int main(int argc, char *argv[]){
 	printf("\n######################\n");
 	printf("#       RESUMÉ       #");
 	printf("\n######################\n");
-	printf("Lock: %s %s\n", lock_class.c_str(), lock_version.c_str());
+	//printf("Lock: %s %s\n", lock_class.c_str(), lock_version.c_str());
+	printf("\nLock name (attribute): %s\n", my_lock.name.c_str());
 	printf("mutex_fail_count = %d\n", mutex_fail_count);
 	printf("fcfs_fail_count = %d\n", fcfs_fail_count);
 

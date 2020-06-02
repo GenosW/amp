@@ -8,6 +8,8 @@
 class Lamport_Lecture : public DW_Lock
 {
 	// bakery class according to lecture notes
+public:
+	string name = "Lamport_Lecture";
 
 protected: // protected = private but sub-classes can access
 	bool *flag;
@@ -108,6 +110,8 @@ class Lamport_Lecture_fix : public Lamport_Lecture
 	// bakery class according to lecture notes (fixed)
 	// this uses an atomic integer register for keeping track of
 	// the latest drawn ticket. like this mutual exclusion holds.
+public:
+	string name = "Lamport_Lecture_fix";
 
 private:
 	std::atomic<int> latest_ticket;
@@ -130,6 +134,8 @@ private:
 class Lamport_Original : public DW_Lock
 {
 	// bakery class according to Lamport 1974
+public:
+	string name = "Lamport_Original";
 
 private:
 	bool *gettoken;

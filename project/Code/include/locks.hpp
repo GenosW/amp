@@ -17,6 +17,8 @@ class Lock
 {
 	// basic lock interface
 public:
+	string name = "Lock";
+
 	virtual void lock() = 0;
 	virtual void unlock() = 0;
 };
@@ -25,6 +27,8 @@ class DW_Lock : public Lock
 {
 	// basic lock interface for locks, that have a doorway
 public:
+	string name = "DW-Lock";
+
 	virtual void doorway() = 0;
 	virtual void wait() = 0;
 	virtual void lock() = 0;
@@ -38,6 +42,8 @@ private:
 	std::atomic_flag lock_stream = ATOMIC_FLAG_INIT;
 
 public:
+	string name = "Reference-Lock";
+
 	Reference_Lock()
 	{
 		std::atomic_flag lock_stream = ATOMIC_FLAG_INIT;
