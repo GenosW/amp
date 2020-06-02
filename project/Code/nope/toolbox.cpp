@@ -1,9 +1,4 @@
-#pragma once
-#include <stdio.h>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <tuple>
+#include "toolbox.hpp"
 
 using namespace std;
 

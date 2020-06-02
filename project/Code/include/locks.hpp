@@ -38,9 +38,46 @@ private:
 	std::atomic_flag lock_stream = ATOMIC_FLAG_INIT;
 
 public:
-	Reference_Lock();
-	void doorway();
-	void wait();
-	void lock();
-	void unlock();
+	Reference_Lock()
+	{
+		std::atomic_flag lock_stream = ATOMIC_FLAG_INIT;
+	}
+
+public:
+	void doorway()
+	{
+#ifdef LOCK_MSG
+		int id = omp_get_thread_num();
+		printf("thread %i TRIES to acquire the lock\n", id);
+#endif
+	}
+
+public:
+	void wait()
+	{
+		while (lock_stream.test_and_set())
+		{
+		}
+#ifdef LOCK_MSG
+		int id = omp_get_thread_num();
+		printf("thread %i ACQUIRES the lock\n", id);
+#endif
+	}
+
+public:
+	void lock()
+	{
+		doorway();
+		wait();
+	}
+
+public:
+	void unlock()
+	{
+#ifdef LOCK_MSG
+		int id = omp_get_thread_num();
+		printf("thread %i UNLOCKS\n", id);
+#endif
+		lock_stream.clear();
+	}
 };

@@ -4,7 +4,11 @@
 #include <time.h>
 #include <assert.h>
 
-#include "tests.cpp"
+#include "locks.hpp"
+#include "lamport.hpp"
+#include "taubenfeld.hpp"
+#include "tests.hpp"
+#include "toolbox.hpp"
 //#include "locks.hpp" // lock implementations
 //#include "toolbox.cpp" // helper functions are already included in locks.cpp
 

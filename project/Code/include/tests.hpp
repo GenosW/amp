@@ -5,7 +5,25 @@
 #include <assert.h>
 
 #include "locks.hpp"
+#include "toolbox.hpp"
 
+/* Declaration */
+void do_some_work(int workload, double randomness);
+
+bool test_fcfs(DW_Lock* test_lock, int num_threads,
+	int num_turns, int workload, int cs_workload,
+	double randomness,
+	bool print_to_console = false, bool mutex_dw = false);
+bool test_mutex(Lock* test_lock, int num_threads, 
+	int num_turns, int workload, int cs_workload,
+	double randomness,
+	bool print_to_console = false);
+bool test_fcfs_mutex_dw(DW_Lock* test_lock, int num_threads, 
+				int num_turns, int workload, int cs_workload,
+				double randomness, 
+				bool print_to_console = false);
+
+/* Implementation */
 void do_some_work(int workload, double randomness){
 	// does some work (workload * 3 flops)
 	// randomness in [0,1] is the portion of the workload
@@ -36,7 +54,7 @@ void do_some_work(int workload, double randomness){
 bool test_fcfs(DW_Lock* test_lock, int num_threads,
 	int num_turns, int workload, int cs_workload,
 	double randomness,
-	bool print_to_console = false, bool mutex_dw = false)
+	bool print_to_console, bool mutex_dw)
 {
 /*
 	wia mocht ma des....
@@ -234,7 +252,7 @@ bool test_fcfs(DW_Lock* test_lock, int num_threads,
 bool test_mutex(Lock* test_lock, int num_threads, 
 	int num_turns, int workload, int cs_workload,
 	double randomness,
-	bool print_to_console = false)
+	bool print_to_console)
 {
 	// this tests the mutual exclusion property of a lock
 	// returns true if mutual exclusion held true, false otherwise
@@ -322,7 +340,7 @@ bool test_mutex(Lock* test_lock, int num_threads,
 bool test_fcfs_mutex_dw(DW_Lock* test_lock, int num_threads, 
 				int num_turns, int workload, int cs_workload,
 				double randomness, 
-				bool print_to_console = false)
+				bool print_to_console)
 {
 	// this tests the fcfs property of a lock
 	// returns true if fcfs held true, false otherwise

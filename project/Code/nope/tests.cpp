@@ -1,10 +1,4 @@
-#include <stdio.h>
-#include <omp.h>
-#include <math.h>
-#include <time.h>
-#include <assert.h>
-
-#include "locks.hpp"
+#include "toolbox.hpp"
 
 void do_some_work(int workload, double randomness){
 	// does some work (workload * 3 flops)
