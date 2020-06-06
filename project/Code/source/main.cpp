@@ -36,7 +36,7 @@ int main(int argc, char *argv[]){
 	//// --- Lamport
 	// lock_class = "Lamport";
 	// Lamport_Lecture my_lock {num_threads}; lock_version = "Lecture";
-	//Lamport_Lecture_fix my_lock{ num_threads }; lock_version = "Fix1";
+	// Lamport_Lecture_fix my_lock{ num_threads }; lock_version = "Fix1";
 	// Lamport_Original my_lock{ num_threads }; lock_version = "Original";
 
 	//// --- Taubenfeld
