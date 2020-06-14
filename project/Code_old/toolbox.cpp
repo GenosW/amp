@@ -7,6 +7,23 @@
 
 using namespace std;
 
+void print_log(int* array, int cols, int rows) {
+	// prints a lock log to the console
+	// cols/rows ... number of columns/rows
+	for (int j = 0; j != rows; ++j)
+	{
+		for (int i = 0; i < cols; i += 2)
+		{
+			printf("%d,", array[i + cols * j]);
+			if ((array[i + 1 + cols * j]) == 1)	printf("b, ");
+			if ((array[i + 1 + cols * j]) == 2)	printf("f, ");
+			if ((array[i + 1 + cols * j]) == 3)	printf("a, ");
+			if ((array[i + 1 + cols * j]) == 4)	printf("u, ");
+		}
+		printf("\n");
+	}
+}
+
 template<typename T>
 T convertTo(const int position, const T init, int argc, char *argv[]) {
   if (argc <= position) {
