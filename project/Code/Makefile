@@ -1,20 +1,30 @@
+#
+# TODO: Move `libmongoclient.a` to /usr/local/lib so this can work on production servers
+#
+CC := g++ # This is the main compiler
+# CC := clang --analyze # and comment out the linker last line for sanity
+SRCDIR := source
+BUILDDIR := build
 PROG = project2
-OBJECTS = main.cpp
-PREREQ = main.cpp locks.cpp toolbox.cpp Makefile
-CXX = g++
-#CXX = clang
+TARGET := bin/$(PROG)
+ 
+SRCEXT := cpp
+SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
+OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
+CFLAGS :=  -Wall -std=c++11 -Xpreprocessor -fopenmp -g # -Wall
+LIB := -lomp
+INC := -I include
 
-FLAGS = -Wall -std=c++11 -Xpreprocessor -fopenmp -lomp
-# optimization flags are dangerous here
-# -O1 and -O3 will break Lamport_Original
-#FLAGS = -Wall -fopenmp -O3
+$(TARGET): $(OBJECTS)
+	@echo " Linking..."
+	@echo " $(CC) $^ -o $(TARGET) $(LIB)"; $(CC) $^ -o $(TARGET) $(LIB)
 
-all: $(PROG)
+$(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
+	@mkdir -p $(BUILDDIR)
+	@echo " $(CC) $(CFLAGS) $(INC) -c -o $@ $<"; $(CC) $(CFLAGS) $(INC) -c -o $@ $<
 
-$(PROG): $(PREREQ)
-	$(CXX) $(OBJECTS) $(FLAGS) -g -o $@
+clean:
+	@echo " Cleaning..."; 
+	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -r $(BUILDDIR) $(TARGET)
 
 .PHONY: clean
-clean:
-	rm $(PROG)
-
