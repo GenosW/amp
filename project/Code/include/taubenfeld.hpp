@@ -86,13 +86,12 @@ private:
 	virtual void take_ticket(int id)
 	{
 		tickets[id].color = *color;
-		int new_number = 0;
+		volatile int new_number = 0;
 		for (int i = 0; i < size; i++)
 		{
 			if (tickets[i].color == tickets[id].color)
 			{
-				int ticket_number = tickets[i].number;
-				new_number = std::max(new_number, ticket_number);
+				new_number = std::max(new_number, tickets[i].number);
 			}
 		}
 		tickets[id].number = new_number + 1;
