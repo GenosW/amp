@@ -9,8 +9,8 @@
 #include <assert.h>
 #include "locks.hpp" // basic lock interface + reference lock implementations
 #include "lamport.hpp" // implementation of lamport bakery locks
-#include "taubenfeld.hpp"	// implementation of taubenfeld (black/white) 
-							// bakery locks
+#include "taubenfeld.hpp"	// implementation of taubenfeld color bakery locks
+#include "jayanti.hpp" // implementation of Jayanti style B-Bakery locks
 #include "aravind.hpp" // implementation of aravind locks
 #include "tests.hpp" // lock tests (mutex, fcfs)
 #include "toolbox.hpp" // various helper functions
@@ -22,12 +22,12 @@ int main(int argc, char *argv[]){
 
 	int num_threads = convertTo<int>(1, 4, argc, argv);
 	// how many times does every thread need to pass through critical section
-	int num_turns = convertTo<int>(2, 2, argc, argv);
-	int num_tests = convertTo<int>(3, 10, argc, argv);
+	int num_turns = convertTo<int>(2, 10, argc, argv);
+	int num_tests = convertTo<int>(3, 100, argc, argv);
 
 	// amount of work in the critical/noncritical section
 	int workload = int(0.);
-	int cs_workload = int(2.e2);
+	int cs_workload = int(15); //int(2.e2);
 	// how random the wl in the noncritical section should be
 	double randomness = 0.5; 
 
@@ -37,30 +37,27 @@ int main(int argc, char *argv[]){
 	//DW_Lock* my_lock = new Lamport_Lecture{num_threads};
 
 	// The 2 strings hold information on which Lock is being tested
-	string lock_class="<not-set>", lock_version="<not-set>";
 	//// --- Lamport
-	// lock_class = "Lamport";
-	//Lamport_Lecture my_lock {num_threads}; lock_version = "Lecture";
-	//Lamport_Lecture_fix my_lock{ num_threads }; lock_version = "Fix1";
-	//Lamport_Lecture_atomic my_lock{ num_threads }; lock_version = "Fix2";
-	//Lamport_Original my_lock{ num_threads }; lock_version = "Original";
+	//Lamport_Lecture my_lock {num_threads};
+	//Lamport_Lecture_fix my_lock{ num_threads };
+	//Lamport_Lecture_atomic my_lock{ num_threads };
+	Lamport_Original my_lock{ num_threads };
 
 	//// --- Taubenfeld
-	// lock_class = "Taubenfeld";
-	//Taubenfeld my_lock{num_threads}; lock_version = "Paper v1";
-	//Taubenfeld_fix my_lock{num_threads}; lock_version = "Fix1";
+	//Taubenfeld my_lock{num_threads};
+	//Taubenfeld_fix my_lock{num_threads};
+
+	//// --- Jayanti
+	//Jayanti my_lock{num_threads};
 
 	//// --- Szymansky
-	//lock_class = "Szymansky";
 
 	//// --- Aravind
-	//Aravind my_lock{ num_threads }; lock_version = "Paper2011";
-	//Aravind_fix my_lock{ num_threads }; lock_version = "Paper2011";
-	//lock_class = "Aravind";
+	//Aravind my_lock{ num_threads };
+	//Aravind_fix my_lock{ num_threads };
 
 	// C++ Reference Lock
-	//lock_class = "Reference";
-	Reference_Lock my_lock; lock_version = "C++11";
+	//Reference_Lock my_lock;
 	
 
 	bool test_mutex_switch = true;
@@ -68,7 +65,6 @@ int main(int argc, char *argv[]){
 	bool test_lru_switch = true;
 
 	// Quick print to console that shows the configuration of the benchmark
-	// printf("\nTesting lock: %s %s\n", lock_class.c_str(), lock_version.c_str());
 	printf("\nTesting lock 2: %s\n", my_lock.name.c_str());
 	printf("Performing mutex test: %d\n", test_mutex_switch);
 	printf("Performing FCFS test: %d\n", test_fcfs_switch);
@@ -176,7 +172,6 @@ int main(int argc, char *argv[]){
 	printf("\n######################\n");
 	printf("#       RESUMÉ       #");
 	printf("\n######################\n");
-	//printf("Lock: %s %s\n", lock_class.c_str(), lock_version.c_str());
 	printf("\nLock name (attribute): %s\n", my_lock.name.c_str());
 	printf("mutex_fail_count = %d\n", mutex_fail_count);
 	printf("fcfs_fail_count = %d\n", fcfs_fail_count);

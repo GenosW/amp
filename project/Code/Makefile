@@ -1,5 +1,5 @@
-#
-# TODO: Move `libmongoclient.a` to /usr/local/lib so this can work on production servers
+# To-Dos:
+# - add something if you want
 #
 CC := g++ # This is the main compiler
 # CC := clang --analyze # and comment out the linker last line for sanity
@@ -11,8 +11,8 @@ TARGET := bin/$(PROG)
 SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
-CFLAGS :=  -Wall -std=c++11 -Xpreprocessor -fopenmp -g # -Wall
-LIB := -lomp
+CFLAGS :=  -Wall -std=c++11 -Xpreprocessor -g
+LIB := -fopenmp # -lomp # for MAC
 INC := -I include
 
 $(TARGET): $(OBJECTS)
