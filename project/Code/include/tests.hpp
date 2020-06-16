@@ -5,6 +5,7 @@
 #include <time.h>
 #include <assert.h>
 #include <random>
+#include <string>
 
 #include "locks.hpp"
 #include "toolbox.hpp"
@@ -903,6 +904,22 @@ int test_lru(DW_Lock* test_lock, int num_threads,
 	//return true;
 	// these days, however, we rather return the number of violations
 	return lru_violations;
+}
+
+struct bm_results
+{
+	string lock_name;
+	int num_threads;
+	int num_turns;
+	int num_tests;
+	int mutex_fail_count;
+	int fcfs_fail_count;
+	int lru_fail_count;
+};
+
+string log_results(bm_results results)
+{
+
 }
 
 //_79_column_check_line:#######################################################

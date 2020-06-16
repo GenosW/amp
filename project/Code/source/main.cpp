@@ -1,6 +1,5 @@
 //_79_column_check_line:#######################################################
-
-#include  <stdio.h>
+#include <stdio.h>
 #include <omp.h>
 #include <math.h>
 #include <time.h>
@@ -38,10 +37,10 @@ int main(int argc, char *argv[]){
 
 	// The 2 strings hold information on which Lock is being tested
 	//// --- Lamport
-	//Lamport_Lecture my_lock {num_threads};
+	Lamport_Lecture my_lock {num_threads};
 	//Lamport_Lecture_fix my_lock{ num_threads };
 	//Lamport_Lecture_atomic my_lock{ num_threads };
-	Lamport_Original my_lock{ num_threads };
+	//Lamport_Original my_lock{ num_threads };
 
 	//// --- Taubenfeld
 	//Taubenfeld my_lock{num_threads};

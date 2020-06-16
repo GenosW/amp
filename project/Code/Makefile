@@ -11,9 +11,9 @@ TARGET := bin/$(PROG)
 SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
-CFLAGS :=  -Wall -std=c++11 -Xpreprocessor -g
-LIB := -fopenmp # -lomp # for MAC
-INC := -I include
+CFLAGS :=  -Wall -std=c++11 -Xpreprocessor #-g
+LIB := -lomp #-fopenmp # for MAC: -lomp
+INC := -I./include -I/usr/local/Cellar/libomp/9.0.0/include/omp.h
 
 $(TARGET): $(OBJECTS)
 	@echo " Linking..."
