@@ -35,9 +35,8 @@ int main(int argc, char *argv[]){
 	//Lamport_Lecture* my_lock = new Lamport_Lecture{num_threads};
 	//DW_Lock* my_lock = new Lamport_Lecture{num_threads};
 
-	// The 2 strings hold information on which Lock is being tested
 	//// --- Lamport
-	Lamport_Lecture my_lock {num_threads};
+	//Lamport_Lecture my_lock {num_threads};
 	//Lamport_Lecture_fix my_lock{ num_threads };
 	//Lamport_Lecture_atomic my_lock{ num_threads };
 	//Lamport_Original my_lock{ num_threads };
@@ -47,7 +46,8 @@ int main(int argc, char *argv[]){
 	//Taubenfeld_fix my_lock{num_threads};
 
 	//// --- Jayanti
-	//Jayanti my_lock{num_threads};
+	Jayanti_UB my_lock{num_threads};
+	//Jayanti_B my_lock{num_threads};
 
 	//// --- Szymansky
 
@@ -64,7 +64,7 @@ int main(int argc, char *argv[]){
 	bool test_lru_switch = true;
 
 	// Quick print to console that shows the configuration of the benchmark
-	printf("\nTesting lock 2: %s\n", my_lock.name.c_str());
+	printf("\nTesting lock: %s\n", my_lock.name.c_str());
 	printf("Performing mutex test: %d\n", test_mutex_switch);
 	printf("Performing FCFS test: %d\n", test_fcfs_switch);
 	printf("num_threads = %d\n", num_threads);
@@ -106,7 +106,8 @@ int main(int argc, char *argv[]){
 		}
 	}
 	stop = omp_get_wtime();
-	printf("time elapesed in seconds = %.5f\n", stop - start);
+	double mutex_time = stop - start;
+	printf("time elapesed in seconds = %.5f\n", mutex_time);
 	start = stop;
 
 	printf("\n----------------------\n");
@@ -136,7 +137,8 @@ int main(int argc, char *argv[]){
 		}
 	}
 	stop = omp_get_wtime();
-	printf("time elapesed in seconds = %.5f\n", stop - start);
+	double fcfs_time = stop - start;
+	printf("time elapesed in seconds = %.5f\n", fcfs_time);
 	start = stop;
 
 	printf("\n----------------------\n");
@@ -164,7 +166,8 @@ int main(int argc, char *argv[]){
 		}
 	}
 	stop = omp_get_wtime();
-	printf("time elapesed in seconds = %.5f\n", stop - start);
+	double lru_time = stop - start;
+	printf("time elapesed in seconds = %.5f\n", lru_time);
 
 
 	printf("\n----------------------\n");
@@ -181,6 +184,20 @@ int main(int argc, char *argv[]){
 	//test_RNG(num_threads, num_turns);
 
 	//test_random_workload(30,1e5,.9);
+
+	bm_results results;
+	results.lock_name = my_lock.name.c_str();
+	results.num_threads = num_threads;
+	results.num_turns = num_turns;
+	results.num_tests = num_tests;
+	results.mutex_fail_count = mutex_fail_count;
+	results.fcfs_fail_count = fcfs_fail_count;
+	results.lru_fail_count = lru_fail_count;
+	results.mutex_time = mutex_time;
+	results.fcfs_time = fcfs_time;
+	results.lru_time = lru_time;
+	string path = log_results(results, "data.csv");
+	printf("\nSaved results in file: %s", path.c_str());
 
 	// I coded the destructors to print a message when they are being called...
 	// just to make sure that and where they are being called.

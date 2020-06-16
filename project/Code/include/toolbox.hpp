@@ -129,13 +129,12 @@ bool lex_lesser_than2(myT a1, myT2 a2, myT b1, myT2 b2)
 	return false;
 }
 
-
-/** (a1, a2, a3) >= (b1, b2, b3)
+/** (a1, a2, a3) > (b1, b2, b3)
  * 
  * lexicographic comparison for 2 tuples 
  */
 template <typename myT, typename myT2, typename myT3>
-bool lex_geq(myT a1, myT2 a2, myT3 a3, myT b1, myT2 b2, myT3 b3)
+bool lex_greater(myT a1, myT2 a2, myT3 a3, myT b1, myT2 b2, myT3 b3)
 {
 	if (a1 > b1)
 		return true;
@@ -149,6 +148,60 @@ bool lex_geq(myT a1, myT2 a2, myT3 a3, myT b1, myT2 b2, myT3 b3)
 	// If here: (a1, a2) == (b1, b2)
 	if (a3 >= b3)
 		return true;
+	return false;
+}
+
+/** (a1, a2, a3) >= (b1, b2, b3)
+ * 
+ * lexicographic comparison for 2 tuples 
+ */
+template <typename myT, typename myT2, typename myT3>
+bool lex_geq(myT a1, myT2 a2, myT3 a3, myT b1, myT2 b2, myT3 b3)
+{
+	if (lex_greater(a1, a2, a3, b1, b2, b3))
+		return true;
+	// If here: (a1, a2) == (b1, b2), (a3 >= b3)
+	if (a3 == b3)
+		return true;
+	// If here: a3 > b3
+	return false;
+}
+
+/** (a1, a2, a3) < (b1, b2, b3)
+ * 
+ * lexicographic comparison for 2 tuples 
+ */
+template <typename myT, typename myT2, typename myT3>
+bool lex_less(myT a1, myT2 a2, myT3 a3, myT b1, myT2 b2, myT3 b3)
+{
+	if (a1 < b1)
+		return true;
+	if (a1 > b1)
+		return false;
+	// If here: a1 == b1
+	if (a2 < b2)
+		return true;
+	if (a2 > b2)
+		return false;
+	// If here: a2 == b2
+	if (a3 < b3)
+		return true;
+	return false;
+}
+
+/** (a1, a2, a3) <= (b1, b2, b3)
+ * 
+ * lexicographic comparison for 2 tuples 
+ */
+template <typename myT, typename myT2, typename myT3>
+bool lex_leq(myT a1, myT2 a2, myT3 a3, myT b1, myT2 b2, myT3 b3)
+{
+	if (lex_less(a1, a2, a3, b1, b2, b3))
+		return true;
+	// If here: (a1, a2) == (b1, b2), (a3 >= b3)
+	if (a3 == b3)
+		return true;
+	// If here: a3 > b3
 	return false;
 }
 

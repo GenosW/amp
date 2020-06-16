@@ -2,3 +2,5 @@
 .env
 *.ini
 hidden*
+**/bin/*
+**/build/*

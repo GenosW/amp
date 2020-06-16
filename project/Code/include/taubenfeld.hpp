@@ -102,6 +102,33 @@ private:
 		tickets[id].number = 0; // Set ticket number to zero
 	}
 
+	bool keep_waiting(int id)
+	{
+		for (int j = 0; j < size; j++)
+		{
+			//while (choosing[j]) {}
+			// if not choosing and tickets.number_j < tickets.number_id									|| !gettickets.number[j]
+			if (j!=id)
+			{
+				if (tickets[id].color==tickets[j].color )
+				{
+					if ((lex_lesser_than2(tickets[j].number, j, tickets[id].number, id) && tickets[j].number!=0) || choosing[j]) //(lex_less(tickets[j].color, tickets[j].number, j, tickets[id].color, tickets[id].number, id) || choosing[j]))
+					{
+						return true;
+					}
+				}
+				else // color is different --> here it matters who has same color as *color
+				{
+					if (tickets[j].color!=*color || choosing[j])
+					{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 public:
 	void doorway()
 	{
@@ -146,6 +173,9 @@ public:
 				}
 			}
 		}
+		// while (keep_waiting(id))
+		// {
+		// }
 		inCS = true;
 		//#ifdef LOCK_MSG
 		//printf("thread %i ACQUIRES the lock\n", id);
