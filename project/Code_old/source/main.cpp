@@ -36,7 +36,7 @@ int main(int argc, char *argv[]){
 	//DW_Lock* my_lock = new Lamport_Lecture{num_threads};
 
 	//// --- Lamport
-	//Lamport_Lecture my_lock {num_threads};
+	Lamport_Lecture my_lock {num_threads};
 	//Lamport_Lecture_fix my_lock{ num_threads };
 	//Lamport_Lecture_atomic my_lock{ num_threads };
 	//Lamport_Original my_lock{ num_threads };
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]){
 	//Taubenfeld_fix my_lock{num_threads};
 
 	//// --- Jayanti
-	Jayanti_UB my_lock{num_threads};
+	//Jayanti_UB my_lock{num_threads};
 	//Jayanti_B my_lock{num_threads};
 
 	//// --- Szymansky

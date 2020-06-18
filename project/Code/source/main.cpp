@@ -1,5 +1,4 @@
 //_79_column_check_line:#######################################################
-
 #include  <stdio.h>
 #include <omp.h>
 #include <math.h>
@@ -22,24 +21,26 @@
 int main(int argc, char *argv[]){
 
 	int num_threads = convertTo<int>(1, 4, argc, argv);
-	// how many times does every thread need to pass through critical section
 	int num_turns = convertTo<int>(2, 2, argc, argv);
-	int num_tests = convertTo<int>(3, 10, argc, argv);
+	int num_tests = convertTo<int>(3, 1, argc, argv);
+	int workload = convertTo<int>(4, 2, argc, argv);
+	int cs_workload = convertTo<int>(5, 1, argc, argv);
+	double randomness = convertTo<double>(6, 0.5, argc, argv);
 
 	// amount of work in the critical/noncritical section
-	int workload = int(0.);
-	int cs_workload = int(0.);
-	// how random the wl in the noncritical section should be
-	double randomness = 0.;
+	// int workload = int(0.);
+	// int cs_workload = int(0.);
+	// // how random the wl in the noncritical section should be
+	// double randomness = 0.;
 
 	//// --- Lamport
-	Lamport_Lecture my_lock {num_threads};
+	//Lamport_Lecture my_lock {num_threads};
 	//Lamport_Lecture_fix my_lock{ num_threads };
 	//Lamport_Lecture_atomic my_lock{ num_threads };
 	//Lamport_Original my_lock{ num_threads };
 
 	//// --- Taubenfeld
-	//Taubenfeld my_lock{num_threads};
+	Taubenfeld my_lock{num_threads};
 	//Taubenfeld_fix my_lock{num_threads};
 	//Taubenfeld_atomic my_lock{num_threads};
 
@@ -57,7 +58,7 @@ int main(int argc, char *argv[]){
 	//my_lock.my_test();
 	
 	bool test_mutex_switch = true;
-	bool test_fcfs_switch = false;
+	bool test_fcfs_switch = true;
 	bool test_lru_switch = false;
 	bool test_bt_switch = false;
 	bool comp_shared_counter_switch = false;

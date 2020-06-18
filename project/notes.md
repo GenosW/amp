@@ -26,6 +26,19 @@ A mutual exclusion with stronger fairness guarantees (firstcome-first-served, FI
 
 Idea: Take a ticket that is larger than the ones already in the bakery (or having been served); wait until my ticket is smallest.
 
+## Plots
+
+- throughput/num_threads (*4) *num_workloads
+- throughput/num_ac
+- aravind: lru-fails/num_threads
+
+
+## Batch submissions on Nebula
+
+```shell
+srun -p q_student --time=1:00 -N 1 ./project2 4 10 10
+```
+
 ## Nebulac (Nebula Compute node)
 
 Architecture:        x86_64
