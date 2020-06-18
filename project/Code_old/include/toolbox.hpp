@@ -129,7 +129,6 @@ bool lex_lesser_than2(myT a1, myT2 a2, myT b1, myT2 b2)
 	return false;
 }
 
-
 /** (a1, a2, a3) > (b1, b2, b3)
  * 
  * lexicographic comparison for 2 tuples 
