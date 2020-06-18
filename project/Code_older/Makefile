@@ -1,3 +1,6 @@
+# To-Dos:
+# - add something if you want
+#
 CC := g++ # This is the main compiler
 # CC := clang --analyze # and comment out the linker last line for sanity
 SRCDIR := source
@@ -10,7 +13,7 @@ SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 CFLAGS :=  -Wall -std=c++11 -Xpreprocessor -g -fopenmp
 LIB := -fopenmp # for MAC: -lomp
-INC := -I./include # for MAC: -I/usr/local/Cellar/libomp/9.0.0/include/omp.h
+INC := -I./include #-I/usr/local/Cellar/libomp/9.0.0/include/omp.h
 
 # Quick summary on flags and command line options:
 # -Wall: enable "all" warning (not really all...)
@@ -21,6 +24,8 @@ INC := -I./include # for MAC: -I/usr/local/Cellar/libomp/9.0.0/include/omp.h
 # MAC/Clang:
 # -lomp : instead of -fopenmp
 # no -g
+
+
 
 $(TARGET): $(OBJECTS)
 	@echo " Linking..."

@@ -29,7 +29,13 @@ public:
 			flag[i] = false;
 			label[i] = 0;
 		}
-	}
+	};
+	~Lamport_Lecture()
+	{
+		printf("Deleting %s...\n", name.c_str());
+		delete[] flag;
+		delete[] label;
+	};
 
 	// make that one virtual so a subclass can
 	// override it with its own function

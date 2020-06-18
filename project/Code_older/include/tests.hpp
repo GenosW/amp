@@ -1,10 +1,13 @@
 //_79_column_check_line:#######################################################
 #include <stdio.h>
+#include <iostream>
+#include <fstream>
 #include <omp.h>
 #include <math.h>
 #include <time.h>
 #include <assert.h>
 #include <random>
+#include <string>
 
 #include "locks.hpp"
 #include "toolbox.hpp"
@@ -17,23 +20,19 @@
 
 /* Declaration */
 void do_some_work(int workload, double randomness);
-/*
+
 int test_fcfs(DW_Lock* test_lock, int num_threads,
 	int num_turns, int workload, int cs_workload,
 	double randomness,
-	bool print_to_console = false);
+	bool print_to_console = false, bool mutex_dw = false);
 int test_mutex(Lock* test_lock, int num_threads,
 	int num_turns, int workload, int cs_workload,
 	double randomness,
 	bool print_to_console = false);
-*/
-/*
 bool test_fcfs_mutex_dw(DW_Lock* test_lock, int num_threads,
 	int num_turns, int workload, int cs_workload,
 	double randomness,
 	bool print_to_console = false);
-*/
-double avg_num_contenders(int* event_log, int num_threads, int num_turns);
 
 
 void get_RNG_seeds(int* seeds, int num_threads) {
@@ -51,7 +50,6 @@ void get_RNG_seeds(int* seeds, int num_threads) {
 
 
 void test_RNG(int num_threads, int num_turns) {
-	// just some code for testing our RNGs
 	omp_set_num_threads(num_threads);
 
 	int min = 0;
@@ -77,8 +75,33 @@ void test_RNG(int num_threads, int num_turns) {
 }
 
 /* Implementation */
+void do_some_work(int workload, double randomness) {
+	// does some work (workload * 3 flops)
+	// randomness in [0,1] is the portion of the workload
+	// that is randomized 0... full workload, 
+	//					0.5... workload between 50-100%
+	//					  1... workload between 0-100%
 
-void do_some_work(int workload, double randomness, std::mt19937 generator) {
+	assert((0 <= randomness) && (randomness <= 1));
+
+	double randy = (rand() % 1000) / 1000.;
+	int rand_wl = int(((1 - randomness) + randomness * randy) * workload);
+
+	double dummy = 1.23;
+
+#ifdef DEBUG_RNG
+	int id = omp_get_thread_num();
+	printf("id = %d, rand_wl = %d\n", id, rand_wl);
+#endif
+
+	for (int i = 0; i < rand_wl; i++) {
+		dummy = dummy + dummy;
+		dummy = dummy + 1e-10;
+		dummy = dummy / 2;
+	}
+}
+
+void do_some_work2(int workload, double randomness, std::mt19937 generator) {
 	// 2nd version of do_some_work with thread safe random number generation
 	// every thread passes their own RNG when calling this
 	// does some work (workload * 3 flops)
@@ -89,8 +112,7 @@ void do_some_work(int workload, double randomness, std::mt19937 generator) {
 
 	assert((0 <= randomness) && (randomness <= 1));
 	int rand_wl;
-	// make sure you only do this if randomness is requested
-	if (randomness > 1.e-3){ 
+	if (randomness > 0){
 		int min = 0;
 		int max = 1000;
 		std::uniform_int_distribution<int> distribution(min, max);
@@ -114,7 +136,6 @@ void do_some_work(int workload, double randomness, std::mt19937 generator) {
 	}
 }
 
-/*
 void record_event_log(int* event_log, DW_Lock* test_lock,  int num_threads, 
 	int num_turns, int workload, int cs_workload, double randomness,
 	bool mutex_dw) {
@@ -148,7 +169,8 @@ void record_event_log(int* event_log, DW_Lock* test_lock,  int num_threads,
 		std::mt19937 rng(random_seeds[thread_id]);
 		//std::uniform_int_distribution<int> distribution(min, max);
 
-#pragma omp barrier 
+#pragma omp barrier
+		// ready... get set... go!
 
 		for (int i = 0; i < num_turns; i++) {
 
@@ -178,7 +200,7 @@ void record_event_log(int* event_log, DW_Lock* test_lock,  int num_threads,
 			lock_stream.clear();
 
 			// critical section
-			do_some_work(cs_workload, 0, rng);
+			do_some_work2(cs_workload, 0, rng);
 
 			// atomically write that, you are about to unlock
 			while (lock_stream.test_and_set()) {}
@@ -189,35 +211,15 @@ void record_event_log(int* event_log, DW_Lock* test_lock,  int num_threads,
 			lock_stream.clear();
 
 			// noncritical section
-			do_some_work(workload, randomness, rng);
+			do_some_work2(workload, randomness, rng);
 		}
 	}
 
 }
 
-*/
-
-double record_event_log(int* event_log, DW_Lock* test_lock, int num_threads,
+void record_event_log2(int* event_log, DW_Lock* test_lock, int num_threads,
 	int num_turns, int workload, int cs_workload, double randomness,
-	int test_case = 0) {
-	// this function sends [num_threads] threads through the lock [test_lock]
-	// for [num_turns] times. 
-	// it writes the events into the [event_log] array
-	// possible events: 1: begin doorway
-	//					2: finish doorway
-	//					3: acquire lock
-	//					4: unlock
-	// during the lock-test, every thread will write to its own array 
-	// only a counter variable is shared. after the test, threads put their
-	// data in [event_log]
-	// test_case: in order to show that the shared counter does not influence
-	// the performance too much, it is possble to turn it off
-	// test_case = 0 ... normal mode with full logging
-	// test_case = 1 ... normal mode but do not do final array joining routine
-	//					this is for comparison with test_case = 2
-	// test_case = 2 ... no shared counter therefore no logging possible
-
-	assert((test_case == 0) || (test_case == 1) || (test_case == 2));
+	bool mutex_dw) {
 
 	omp_set_num_threads(num_threads);
 
@@ -237,165 +239,6 @@ double record_event_log(int* event_log, DW_Lock* test_lock, int num_threads,
 	// seeds for randomizing the workload
 	int* random_seeds = new int[num_threads];
 	get_RNG_seeds(random_seeds, num_threads);
-	double runtime; // runtime of the lock test (return value)
-
-#pragma omp parallel
-	{
-		int thread_id = omp_get_thread_num();
-		int tl_counter = 0; // thread local counter
-		int counter_value; // value read from global counter
-		int tl_mrv; // thread local maximum return value (for max token)
-		// an event is begin, finish, acquisition and unlock
-		// num_events*2 because 2 elements are written per event
-		int* tl_event_log = new int[num_events * 2]; // thread local log
-
-		//initialize logging array
-		for (int i = 0; i < num_events * 2; i++) tl_event_log[i] = -1;
-
-		// create a thread-specific random sequence 
-		//srand(random_seeds[thread_id]);
-
-		//create RNGs
-		std::mt19937 rng(random_seeds[thread_id]);
-		//std::uniform_int_distribution<int> distribution(min, max);
-
-
-		// ===============
-		// test the lock
-		// ===============
-#pragma omp barrier
-		double start, stop;
-		if (thread_id == 0) {
-			start = omp_get_wtime();
-		}
-#pragma omp barrier
-		// ready... get set... go!
-
-		for (int i = 0; i < num_turns; i++) {
-
-			// (1) begin doorway
-			// atomically read/increas global counter
-
-			if (test_case != 2) {
-				counter_value = counter.fetch_add(1);
-#ifdef DEBUG_LOG
-				printf("thread: %i, event: %i, global counter: %i\n",
-					thread_id, 1, counter_value);
-#endif
-				tl_event_log[tl_counter] = counter_value; // log counter value
-				tl_event_log[tl_counter + 1] = 1;	// log event type
-				tl_counter += 2;
-			}
-
-			test_lock->doorway();
-
-			// (2) finished doorway
-			// atomically read/increas global counter
-			if (test_case != 2) {
-				counter_value = counter.fetch_add(1);
-#ifdef DEBUG_LOG
-				printf("thread: %i, event: %i, global counter: %i\n",
-					thread_id, 2, counter_value);
-#endif
-				tl_event_log[tl_counter] = counter_value; // log counter value
-				tl_event_log[tl_counter + 1] = 2;	// log event type
-				tl_counter += 2;
-			}
-
-			test_lock->wait();
-
-			// (3) acquired lock
-			// atomically read/increas global counter
-			if (test_case != 2) {
-				counter_value = counter.fetch_add(1);
-#ifdef DEBUG_LOG
-				printf("thread: %i, event: %i, global counter: %i\n",
-					thread_id, 3, counter_value);
-#endif
-				tl_event_log[tl_counter] = counter_value; // log counter value
-				tl_event_log[tl_counter + 1] = 3;	// log event type
-				tl_counter += 2;
-			}
-
-			// critical section
-			do_some_work(cs_workload, 0, rng);
-
-			// (4) unlock
-			// atomically read/increas global counter
-			if (test_case != 2) {
-				counter_value = counter.fetch_add(1);
-#ifdef DEBUG_LOG
-				printf("thread: %i, event: %i, global counter: %i\n",
-					thread_id, 4, counter_value);
-#endif
-				tl_event_log[tl_counter] = counter_value; // log counter value
-				tl_event_log[tl_counter + 1] = 4;	// log event type
-				tl_counter += 2;
-			}
-
-			test_lock->unlock();
-
-			// noncritical section
-			do_some_work(workload, randomness, rng);
-		}
-#pragma omp barrier
-		if (thread_id == 0) {
-			stop = omp_get_wtime();
-			runtime = stop - start;
-		}
-
-#pragma omp barrier
-
-		// ======================================
-		// write event_log from thread local logs
-		// ======================================
-		if (test_case == 0) { // if normal mode
-			int global_counter;
-			int event_type;
-
-			while (lock_stream.test_and_set()) {} // just to be safe
-			for (int i = 0; i < num_events; i++) {
-				// 2*i, because on each turn 2 elements are written
-				global_counter = tl_event_log[2 * i];
-				event_type = tl_event_log[2 * i + 1];
-
-				// 2* global counter: because each event only increases
-				// the counter by 1; but 2 elements are written per event
-				event_log[2 * global_counter] = thread_id;
-				event_log[2 * global_counter + 1] = event_type;
-			}
-			lock_stream.clear();
-		}
-	}
-	return runtime;
-}
-
-/*
-void record_event_log3(int* event_log, DW_Lock* test_lock, int num_threads,
-	int num_turns, int workload, int cs_workload, double randomness,
-	bool mutex_dw) {
-	// this runs the event log without actually logging anything
-	// used for estimating the performance overhead due to logging
-	// no shared objects are accessed besides the lock
-
-	omp_set_num_threads(num_threads);
-
-	// counter keeps track of the logging position
-	atomic <int> counter;
-	counter.store(0);
-	// an event is begin, finish, acquisition and unlock
-	// this is the number of events for each thread
-	int num_events = num_turns * 4;
-
-	//initialize logging array
-	for (int i = 0; i < num_events*num_threads * 2; i++) event_log[i] = -1;
-
-	// our lock for testing the test_lock object
-	std::atomic_flag lock_stream = ATOMIC_FLAG_INIT;
-
-	// seeds for randomizing the workload
-	int* random_seeds = new int[num_threads];
-	get_RNG_seeds(random_seeds, num_threads);
 
 
 #pragma omp parallel
@@ -424,58 +267,58 @@ void record_event_log3(int* event_log, DW_Lock* test_lock, int num_threads,
 
 			// (1) begin doorway
 			// atomically read/increas global counter
-			//counter_value = counter.fetch_add(1);
+			counter_value = counter.fetch_add(1);
 #ifdef DEBUG_LOG
 			printf("thread: %i, event: %i, global counter: %i\n",
 				thread_id, 1, counter_value);
 #endif
-			//tl_event_log[tl_counter] = counter_value; // log counter value
-			//tl_event_log[tl_counter + 1] = 1;	// log event type
-			//tl_counter += 2;
+			tl_event_log[tl_counter] = counter_value; // log counter value
+			tl_event_log[tl_counter + 1] = 1;	// log event type
+			tl_counter += 2;
 
 			test_lock->doorway();
 
 			// (2) finished doorway
 			// atomically read/increas global counter
-			//counter_value = counter.fetch_add(1);
+			counter_value = counter.fetch_add(1);
 #ifdef DEBUG_LOG
 			printf("thread: %i, event: %i, global counter: %i\n",
 				thread_id, 2, counter_value);
 #endif
-			//tl_event_log[tl_counter] = counter_value; // log counter value
-			//tl_event_log[tl_counter + 1] = 2;	// log event type
-			//tl_counter += 2;
+			tl_event_log[tl_counter] = counter_value; // log counter value
+			tl_event_log[tl_counter + 1] = 2;	// log event type
+			tl_counter += 2;
 
 			test_lock->wait();
 
 			// (3) acquired lock
 			// atomically read/increas global counter
-			//counter_value = counter.fetch_add(1);
+			counter_value = counter.fetch_add(1);
 #ifdef DEBUG_LOG
 			printf("thread: %i, event: %i, global counter: %i\n",
 				thread_id, 3, counter_value);
 #endif
-			//tl_event_log[tl_counter] = counter_value; // log counter value
-			//tl_event_log[tl_counter + 1] = 3;	// log event type
-			//tl_counter += 2;
+			tl_event_log[tl_counter] = counter_value; // log counter value
+			tl_event_log[tl_counter + 1] = 3;	// log event type
+			tl_counter += 2;
 
 			// critical section
-			do_some_work(cs_workload, 0, rng);
+			do_some_work2(cs_workload, 0, rng);
 
 			// (4) unlock
 			// atomically read/increas global counter
-			//counter_value = counter.fetch_add(1);
+			counter_value = counter.fetch_add(1);
 #ifdef DEBUG_LOG
 			printf("thread: %i, event: %i, global counter: %i\n",
 				thread_id, 4, counter_value);
 #endif
-			//tl_event_log[tl_counter] = counter_value; // log counter value
-			//tl_event_log[tl_counter + 1] = 4;	// log event type
-			//tl_counter += 2;
+			tl_event_log[tl_counter] = counter_value; // log counter value
+			tl_event_log[tl_counter + 1] = 4;	// log event type
+			tl_counter += 2;
 			test_lock->unlock();
 
 			// noncritical section
-			do_some_work(workload, randomness, rng);
+			do_some_work2(workload, randomness, rng);
 		}
 #pragma omp barrier
 
@@ -486,24 +329,24 @@ void record_event_log3(int* event_log, DW_Lock* test_lock, int num_threads,
 		while (lock_stream.test_and_set()) {}
 		for (int i = 0; i < num_events; i++) {
 			// 2*i, because on each turn 2 elements are written
-			global_counter = tl_event_log[2 * i];
-			event_type = tl_event_log[2 * i + 1];
+			global_counter = tl_event_log[2*i];
+			event_type = tl_event_log[2*i + 1];
 
 			// 2* global counter: because each event only increases
 			// the counter by 1; but 2 elements are written per event
-			event_log[2 * global_counter] = thread_id;
-			event_log[2 * global_counter + 1] = event_type;
+			event_log[2*global_counter] = thread_id;
+			event_log[2*global_counter + 1] = event_type;
 		}
 		lock_stream.clear();
 	}
 }
 
-*/
 
 
 int test_fcfs(DW_Lock* test_lock, int num_threads,
 	int num_turns, int workload, int cs_workload,
-	double randomness, bool print_to_console=false)
+	double randomness,
+	bool print_to_console, bool mutex_dw)
 {
 /*
 		This tests the first-come-first-served property of the 
@@ -536,9 +379,9 @@ int test_fcfs(DW_Lock* test_lock, int num_threads,
 	// times two because thread_id is also written
 	int* event_log = new int[num_events*2]; 
 
-	// =====================
+
 	// run the test
-	// =====================
+	// ---------------
 	double start, stop;
 	bool display_time = true;
 	if (display_time) {
@@ -548,8 +391,8 @@ int test_fcfs(DW_Lock* test_lock, int num_threads,
 
 	//record_event_log(event_log, test_lock, num_threads, num_turns,
 	//	workload, cs_workload, randomness, mutex_dw);
-	record_event_log(event_log, test_lock, num_threads, num_turns,
-		workload, cs_workload, randomness);
+	record_event_log2(event_log, test_lock, num_threads, num_turns,
+		workload, cs_workload, randomness, mutex_dw);
 
 	if (display_time) {
 		stop = omp_get_wtime();
@@ -562,9 +405,8 @@ int test_fcfs(DW_Lock* test_lock, int num_threads,
 		print_log(event_log, num_threads * 8, num_turns);
 	}
 
-	// =====================
 	// evaluate results
-	// =====================
+	// -----------------
 	if (display_time) {
 		printf("evaluating event log... \n");
 		start = omp_get_wtime();
@@ -660,7 +502,7 @@ int test_fcfs(DW_Lock* test_lock, int num_threads,
 int test_mutex(Lock* test_lock, int num_threads, 
 	int num_turns, int workload, int cs_workload,
 	double randomness,
-	bool print_to_console=false)
+	bool print_to_console)
 {
 	// this tests the mutual exclusion property of a lock
 	// returns true if mutual exclusion held true, false otherwise
@@ -685,32 +527,21 @@ int test_mutex(Lock* test_lock, int num_threads,
 	// our lock for testing the test_lock object
 	std::atomic_flag lock_stream = ATOMIC_FLAG_INIT;	
 
-	/*
 	// seeds for randomizing the workload
 	int* random_seeds = new int[num_threads];
 	srand( time(NULL) );
 	for (int i = 0; i < num_threads;i++){
 		random_seeds[i] = rand();
 	}
-	*/
-
-	// seeds for randomizing the workload
-	int* random_seeds = new int[num_threads];
-	get_RNG_seeds(random_seeds, num_threads);
 
 	// do the test
 	//----------------
 	#pragma omp parallel
 	{
 		int thread_id = omp_get_thread_num();
-		/*
+		
 		// create a thread-specific random sequence 
 		srand( random_seeds[thread_id] );
-		*/
-
-		// create thread local RNG
-		std::mt19937 rng(random_seeds[thread_id]);
-
 
 		for (int i = 0; i < num_turns; i++){
 
@@ -722,7 +553,7 @@ int test_mutex(Lock* test_lock, int num_threads,
 			counter++;
 			lock_stream.clear();
 
-			do_some_work(cs_workload, 0, rng);// critical section
+			do_some_work(cs_workload, 0);// critical section
 
 			// atomic releasing and logging, cs has been left
 			while ( lock_stream.test_and_set() ) {}
@@ -731,10 +562,23 @@ int test_mutex(Lock* test_lock, int num_threads,
 			counter++;
 			lock_stream.clear();
 
-			do_some_work(workload,randomness,rng);// noncritical section
+			do_some_work(workload,randomness);// noncritical section
 		}
 	}
 
+	// evaluate event_log
+
+	// make sure that it is a sequence of entering and leaving the cs
+
+	/* this was the old evaluation
+	bool mutex = true;
+	for (int i = 0; i < num_events; i += 2) {
+		if ((event_log[i] != 1) || (event_log[i + 1] != 0))
+		{
+			mutex = false;
+		}
+	}
+	*/
 	// these days we count the number of threads entering the cs,
 	// when there is already a thread in there
 	int mutex_violations = 0;
@@ -744,6 +588,7 @@ int test_mutex(Lock* test_lock, int num_threads,
 			mutex_violations++;
 		}
 	}
+
 
 	//output results
 	//----------------
@@ -756,7 +601,7 @@ int test_mutex(Lock* test_lock, int num_threads,
 	return mutex_violations;
 }
 
-/*
+
 bool test_fcfs_mutex_dw(DW_Lock* test_lock, int num_threads, 
 				int num_turns, int workload, int cs_workload,
 				double randomness, 
@@ -840,7 +685,7 @@ bool test_fcfs_mutex_dw(DW_Lock* test_lock, int num_threads,
 	}
 	return fcfs;
 }
-*/
+
 
 void find_contenders_lru(bool* is_contender, int* event_log, 
 					int acquire_pos, int num_threads) {
@@ -872,8 +717,8 @@ void find_contenders_lru(bool* is_contender, int* event_log,
 
 		is_contender[thread_B] = false;
 		for (int j = acquire_pos; j > 0; j = j - 2) {
-			// idea: if we find an acquisition first: is_contender = false
-			// if we find a finish first: is_contender = true
+			// idea: if we find an acquisition first: not is_contender
+			// if we find a finish first: is_contender
 
 			// if thread_B had an acquisition => is no contender
 			if ((event_log[j] == thread_B) && (event_log[j+1] == 3)) {
@@ -938,7 +783,7 @@ int check_acquisition_lru(int* event_log,
 int test_lru(DW_Lock* test_lock, int num_threads,
 	int num_turns, int workload, int cs_workload,
 	double randomness,
-	bool print_to_console=false)
+	bool print_to_console)
 {
 	// returns the number of acquisitions that violated the LRU property
 	/*
@@ -969,6 +814,12 @@ int test_lru(DW_Lock* test_lock, int num_threads,
 			contenders and make sure, that going back to (A,acquire)_(k-1) 
 			we find an acquisition of each contender.
 
+			This can be violated, if a contender came really late though.
+			I think to deal with this, we might need memory fences. 
+			But that is too advanced for me. How can i measure it? 
+			Chances are, it wont happen, because if you come later, you 
+			probably got the lock later.
+
 			Heres the real thing: if some thread B finishes their doorway
 			after thread A starts their last spin in the wait() before
 			the acquisition, it is possible, that (A,acquire) even though 
@@ -979,6 +830,8 @@ int test_lru(DW_Lock* test_lock, int num_threads,
 			you acquire, you go back to spinning. This still holds the 
 			possibility for a thread to finish their doorway just between
 			you testing and you acquiring the lock. But it is even less likely.
+
+
 
 	*/
 
@@ -1006,8 +859,8 @@ int test_lru(DW_Lock* test_lock, int num_threads,
 	}
 
 	// send threads through the lock and log the events
-	record_event_log(event_log, test_lock, num_threads, num_turns,
-		workload, cs_workload, randomness);
+	record_event_log2(event_log, test_lock, num_threads, num_turns,
+		workload, cs_workload, randomness, false);
 
 	if (print_to_console) {
 		printf("logging for lru completed: here the whole log\n");
@@ -1023,7 +876,7 @@ int test_lru(DW_Lock* test_lock, int num_threads,
 	for (int i = 0; i < num_threads; i++) {
 		has_ac_once[i] = false;
 	}
-	//bool lru;
+	bool lru;
 	int lru_violations = 0;
 	for (int i = 0; i < num_events; i = i + 2) {
 		// if it is an acquisition
@@ -1052,98 +905,51 @@ int test_lru(DW_Lock* test_lock, int num_threads,
 	// if lru was at no point violated...
 	//return true;
 	// these days, however, we rather return the number of violations
-
 	return lru_violations;
 }
 
-double avg_num_contenders(int* event_log, int num_threads, int num_turns) {
+struct bm_results
+{
+	string lock_name;
+	int num_threads;
+	int num_turns;
+	int num_tests;
+	int mutex_fail_count;
+	int fcfs_fail_count;
+	int lru_fail_count;
+	double mutex_time;
+	double fcfs_time;
+	double lru_time;
+	// With this, you can control the seperation char for the insertion operator <<
+	string insertion_sep=";";
 
-	int num_events = num_threads * num_turns * 4;
-	int num_acq = num_threads * num_turns;
-	int* num_contenders = new int[num_acq];
+	friend std::ostream& operator <<(std::ostream& os, bm_results const& a)
+    {
+        return os << a.lock_name << a.insertion_sep
+	        	  << a.num_threads << a.insertion_sep
+	              << a.num_turns << a.insertion_sep
+	              << a.num_tests << a.insertion_sep
+	              << a.mutex_fail_count << a.insertion_sep
+	              << a.fcfs_fail_count << a.insertion_sep
+	              << a.lru_fail_count << a.insertion_sep
+	              << a.mutex_time << a.insertion_sep
+	              << a.fcfs_time << a.insertion_sep
+	              << a.lru_time << a.insertion_sep;
+    }
+};
 
-	bool* is_contender = new bool[num_threads];
-	int counter;
-	int thread_A;
-	int acq_counter = 0;
-
-	for (int i = 0; i < 2*num_events; i=i+2) {
-		// if event
-		if (event_log[i + 1] == 3) {
-			thread_A = event_log[i];
-			// find contenders
-			find_contenders_lru(is_contender, event_log, i, num_threads);
-
-			// calculate number of contenders
-			counter = 0;
-			for (int i = 0; i < num_threads; i++) {
-				if (i == thread_A) i++;
-				if (i == num_threads) break;
-				counter += is_contender[i];
-			}
-			num_contenders[acq_counter] = counter;
-			acq_counter++;
-		}
-	}
-
-	// calculate average and return
-	double sum = 0.;
-	for (int i = 0; i < num_acq; i++) {
-		sum += num_contenders[i];
-	}
-	return (sum / num_acq);
+string log_results(bm_results results, string path)
+{
+	ofstream outfile;
+	// Open file for writing and appending
+	outfile.open(path, std::fstream::out | std::fstream::app);
+	// outfile has format:
+	// string lock_name; num_threads; num_turns; num_tests; mutex_fail_coun; 
+	// fcfs_fail_count; lru_fail_count; mutex_time; fcfs_time; lru_time;
+	outfile << results << endl;
+	
+	outfile.close();
+	return path;
 }
-
-
-
-double throughput(DW_Lock* test_lock, int num_threads,
-	int num_turns, int workload, int cs_workload, double randomness) {
-
-	omp_set_num_threads(num_threads);
-	int num_acq = num_threads * num_turns;
-	// seeds for randomizing the workload
-	int* random_seeds = new int[num_threads];
-	get_RNG_seeds(random_seeds, num_threads);
-	double time;
-#pragma omp parallel
-	{
-		int thread_id = omp_get_thread_num();
-
-		//create RNGs
-		std::mt19937 rng(random_seeds[thread_id]);
-		double start, stop;
-
-		// ===============
-		// test the lock
-		// ===============
-#pragma omp barrier
-		if (thread_id == 0) start = omp_get_wtime();
-#pragma omp barrier
-
-		// ready... get set... go!
-
-		for (int i = 0; i < num_turns; i++) {
-
-
-			test_lock->doorway();
-			test_lock->wait();
-
-			// critical section
-			do_some_work(cs_workload, 0, rng);
-
-			test_lock->unlock();
-
-			// noncritical section
-			do_some_work(workload, randomness, rng);
-		}
-#pragma omp barrier
-		if (thread_id == 0) stop = omp_get_wtime();
-		time = stop - start;
-
-	}
-	// calculate and return throughput
-	return num_acq / time;
-}
-
 
 //_79_column_check_line:#######################################################
