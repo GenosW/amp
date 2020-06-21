@@ -244,7 +244,7 @@ double record_event_log(int* event_log, DW_Lock* test_lock, int num_threads,
 		int thread_id = omp_get_thread_num();
 		int tl_counter = 0; // thread local counter
 		int counter_value; // value read from global counter
-		int tl_mrv; // thread local maximum return value (for max token)
+		//int tl_mrv; // thread local maximum return value (for max token) // unused
 		// an event is begin, finish, acquisition and unlock
 		// num_events*2 because 2 elements are written per event
 		int* tl_event_log = new int[num_events * 2]; // thread local log
@@ -986,7 +986,7 @@ int test_lru(DW_Lock* test_lock, int num_threads,
 	omp_set_num_threads(num_threads);
 
 	// counter keeps track of the logging position
-	int counter = 0;
+	//int counter = 0; // ALSO UNUSED
 	// an event is begin, finish, acquisition and unlock
 	int num_events = num_threads * num_turns * 4;
 	// times two because thread_id is also written
@@ -1096,53 +1096,58 @@ double avg_num_contenders(int* event_log, int num_threads, int num_turns) {
 
 
 
-double throughput(DW_Lock* test_lock, int num_threads,
-	int num_turns, int workload, int cs_workload, double randomness) {
-
-	omp_set_num_threads(num_threads);
-	int num_acq = num_threads * num_turns;
-	// seeds for randomizing the workload
-	int* random_seeds = new int[num_threads];
-	get_RNG_seeds(random_seeds, num_threads);
-	double time;
-#pragma omp parallel
-	{
-		int thread_id = omp_get_thread_num();
-
-		//create RNGs
-		std::mt19937 rng(random_seeds[thread_id]);
-		double start, stop;
-
-		// ===============
-		// test the lock
-		// ===============
-#pragma omp barrier
-		if (thread_id == 0) start = omp_get_wtime();
-#pragma omp barrier
-
-		// ready... get set... go!
-
-		for (int i = 0; i < num_turns; i++) {
+void throughput(DW_Lock* test_lock, double* result, int num_threads,
+	int num_turns, int workload, int cs_workload, double randomness,
+	bool det_anc=true) {
+	// this measures throughput
+	// det_anc = true  ... determine average number of contenders (ANC)
+	//		   = false ... do not determine ANC - will be a little faster
+	// result[0] ... runtime
+	// result[1] ... throughput (=number of acquisitions per second)
+	// result[3] ... ANC
+	// ANC does not include the acquiring thread. i.e. if no acquisition is
+	// ever contended, ANC = 0. If there is always a second thread, also trying
+	// to get the lock, ANC = 1 (even though its is 2 threads competing for
+	// the lock)
+	// so ANC should be interpreted as "average number of other contenders"
+	// from the view of the acquiring thread.
 
 
-			test_lock->doorway();
-			test_lock->wait();
+	// run lock test, measure runtime and record event log 
+	//------------------------------------------------------
 
-			// critical section
-			do_some_work(cs_workload, 0, rng);
+	// mode in which to run record_event_log()
+	int test_case;
+	if (det_anc) test_case = 0; // full logging (shared counter variable)
+	else test_case = 2;			// skip all logging (no shared counter)
+	printf("test_case = %i\n", test_case);
 
-			test_lock->unlock();
+	// allocate event_log
+	int num_events = num_threads * num_turns * 4;
+	printf("will now allocate event_log\n");
+	int* event_log = new int[num_events*2];
 
-			// noncritical section
-			do_some_work(workload, randomness, rng);
-		}
-#pragma omp barrier
-		if (thread_id == 0) stop = omp_get_wtime();
-		time = stop - start;
+	// run threads through the lock
+	printf("will now run test\n");
+ 
+	result[0] = record_event_log(event_log,
+								test_lock, 
+								num_threads, 
+								num_turns,
+								workload, 
+								cs_workload, 
+								randomness
+								);
 
+	int num_acquisitions = num_threads * num_turns;
+	result[1] = num_acquisitions / result[0];
+	
+	// evaluate event_log for average number of contenders
+	//-------------------------------------------------------
+	if (det_anc){
+		result[2] = avg_num_contenders(event_log, num_threads, num_turns);
 	}
-	// calculate and return throughput
-	return num_acq / time;
+	else result[2] = -1;
 }
 
 

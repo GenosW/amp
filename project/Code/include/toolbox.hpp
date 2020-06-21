@@ -1,13 +1,13 @@
 //_79_column_check_line:#######################################################
 #pragma once
+#include <assert.h>
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
-#include <iostream>
-#include <sstream>
+#include <iterator>
+#include <numeric>
 #include <string>
 #include <tuple>
-#include <assert.h>
 #include "locks.hpp"
 
 void print_log(int* array, int cols, int rows);
@@ -85,7 +85,8 @@ bool isequal(myT *array1, myT *array2, int length)
 	return true;
 }
 
-void print_array(int *array, int cols, int rows)
+// For some reason type-templating didn't work here...
+void print_array(int* array, int cols, int rows)
 {
 	// prints an [array] to the console
 	// cols/rows ... number of columns/rows
@@ -97,6 +98,28 @@ void print_array(int *array, int cols, int rows)
 		}
 		printf("\n");
 	}
+}
+// For some reason type-templating didn't work here...
+void print_array(double* array, int cols, int rows)
+{
+	// prints an [array] to the console
+	// cols/rows ... number of columns/rows
+	for (int j = 0; j != rows; ++j)
+	{
+		for (int i = 0; i != cols; ++i)
+		{
+			printf("%f,", array[i + cols * j]);
+		}
+		printf("\n");
+	}
+}
+
+template <typename T>
+double array_average(T *array, int num_elements){
+	assert(num_elements > 0);
+	double sum = std::accumulate(array, (array + num_elements), 0.);
+	//printf("Sum from array_average: %f\n", sum);
+	return sum/double(num_elements);
 }
 
 template <typename myT>
@@ -238,6 +261,8 @@ struct bm_results
     }
 };
 
+// musste auskommentieren, weil error:
+// incomplete type �std::fstream {aka std::basic_fstream<char>}�
 string log_results(bm_results results, string path)
 {
 	ofstream outfile;
@@ -251,5 +276,6 @@ string log_results(bm_results results, string path)
 	outfile.close();
 	return path;
 };
+
 
 //_79_column_check_line:#######################################################
