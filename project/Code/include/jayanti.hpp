@@ -36,6 +36,12 @@ public:
 			//token[i].store(-1);
 		}
 	}
+	~Jayanti(void)
+	{
+		printf("Deleting %s...\n", name.c_str());
+		delete[] gettoken;
+		delete[] token;
+	}
 
 // make that one virtual so a subclass can
 // override it with its own function
@@ -186,8 +192,10 @@ public:
 
 public:
 	Jayanti_BT(int n) :Jayanti{ n }
+	{}
+	~Jayanti_BT(void)
 	{
-
+		printf("Deleting %s...\n", name.c_str());
 	}
 
 private:

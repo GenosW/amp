@@ -24,20 +24,22 @@
  * ./project2 num_threads num_turns num_tests workload cs_workload randomness
  */
 int main(int argc, char *argv[]){
+	double bm_runtime = omp_get_wtime();
+
 	////--------------- Test switches ---------------////
 	bool test_mutex_switch = true;
 	bool test_fcfs_switch = true;
 	bool test_lru_switch = true;
 	//bool test_bt_switch = true; // Compiler says unused
-	bool comp_shared_counter_switch = true;
-	bool anc_switch = true; // average number of contenders (anc)
+	bool comp_shared_counter_switch = false;
+	bool anc_switch = false; // average number of contenders (anc)
 	bool thr_switch = true; // throughput
 	bool det_anc = true; // determine anc when measuring throughput
 
 	////--------------- CL Input ---------------////
 	int num_threads = convertTo<int>(1, 4, argc, argv);
 	// how many times does every thread need to pass through critical section
-	int num_turns = convertTo<int>(2, 2, argc, argv);
+	int num_turns = convertTo<int>(2, 1, argc, argv);
 	int num_tests = convertTo<int>(3, 30, argc, argv);
 	int workload = convertTo<int>(4, 40000, argc, argv);
 	int cs_workload = convertTo<int>(5, 10000, argc, argv);
@@ -297,28 +299,48 @@ int main(int argc, char *argv[]){
 	printf("\n######################\n");
 	printf("#       RESUMÉ       #");
 	printf("\n######################\n");
-	printf("\n Benchmark parameters:\n");
+	printf("\nBenchmark parameters:\n");
 	printf("Lock name (attribute): %s\n", my_lock.name.c_str());
 	printf("num_threads = %d\n", num_threads);
 	printf("num_turns = %d\n", num_turns);
+	printf("num_tests = %d\n", num_tests);
 	printf("num_events = %d\n", num_events);
 
-	
-	printf("\n Benchmark results:\n");
+	printf("\nBenchmark results:\n");
 	printf("mutex_fail_count = %d\n", mutex_fail_count);
 	printf("fcfs_fail_count = %d\n", fcfs_fail_count);
 	printf("lru_fail_count = %d\n", lru_fail_count);
-	printf("anc: %f", anc);
+	if (anc_switch) printf("anc (anc test): %f\n", anc);
 	printf("runtime (s) = %.4f\n",result_thp[0]);
 	printf("throughput (acq/s) = %.4f\n", result_thp[1]);
 	printf("average number of \"other\" contenders (#thr) = %.4f\n", 
 			result_thp[2]);
 	printf("average number of contenders (#thr) = %.4f\n", result_thp[2]+1);
+	bm_runtime = omp_get_wtime() - bm_runtime;
+	int mins, secs, milisecs;
+	seconds_to_m_s_ms(bm_runtime, mins, secs, milisecs);
+	printf("Total benchmark runtime (min:sec:msecs) = %d:%d:%d\n", mins, secs, milisecs);
+	printf("Total benchmark runtime (sec) = %.2f\n", bm_runtime);
 
 	printf("\n\nGarbage collection...\n");
 #endif
-	delete[] time_el_sha_cnt1;
-	delete[] time_el_sha_cnt2;
+	bm_results results{my_lock.name, num_threads, num_turns, num_tests, num_events};
+	results.mutex_fail_count = mutex_fail_count;
+	results.fcfs_fail_count = fcfs_fail_count;
+	results.lru_fail_count = lru_fail_count;
+	results.anc = anc;
+	results.thp_runtime = result_thp[0];
+	results.thp = result_thp[1];
+	results.thp_anc = result_thp[2]+1;
+	results.bm_runtime = bm_runtime;
+	string filepath = "results/results.csv";
+	log_results(results, filepath);
+
+	if (comp_shared_counter_switch)
+	{
+		delete[] time_el_sha_cnt1;
+		delete[] time_el_sha_cnt2;
+	}
 	return 0;	        
 }
 
