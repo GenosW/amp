@@ -1,3 +1,4 @@
+lock_name; num_threads; num_turns; num_tests; num_events; mutex_fail_count; fcfs_fail_count; lru_fail_count; anc; thp_runtime; thp; thp_anc; bm_runtime
 Lamport_Lecture_fix;2;10000;30;80000;0;0;0;0;0.863508;23161.4;1.00175;3.48768
 Lamport_Lecture_fix;3;6800;30;81600;0;0;0;0;0.908789;22447.5;2.00255;3.63361
 Lamport_Lecture_fix;4;5000;30;80000;0;0;8;0;0.929614;21514.3;3.00635;3.87081

@@ -1,4 +1,4 @@
-lock_name; num_threads; num_turns; num_tests; num_events; mutex_fail_coun; fcfs_fail_count; lru_fail_count; anc; thp_runtime; thp; thp_anc; bm_runtime
+lock_name; num_threads; num_turns; num_tests; num_events; mutex_fail_count; fcfs_fail_count; lru_fail_count; anc; thp_runtime; thp; thp_anc; bm_runtime
 Jayanti;2;100000;30;800000;0;0;32;0;10.0273;19945.6;1.01666;42.7473
 Jayanti;3;66666;30;799992;0;0;51;0;9.42888;21211.2;2.00786;38.1413
 Jayanti;4;50000;30;800000;0;0;52;0;9.36628;21353.2;3.00642;41.9053

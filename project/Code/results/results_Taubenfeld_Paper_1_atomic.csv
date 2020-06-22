@@ -1,3 +1,4 @@
+lock_name; num_threads; num_turns; num_tests; num_events; mutex_fail_count; fcfs_fail_count; lru_fail_count; anc; thp_runtime; thp; thp_anc; bm_runtime
 Taubenfeld_Paper_1_atomic;2;10000;30;80000;0;0;1;0;0.868835;23019.3;1.00215;3.49709
 Taubenfeld_Paper_1_atomic;3;6800;30;81600;0;0;1;0;0.893059;22842.8;2.00206;3.87959
 Taubenfeld_Paper_1_atomic;4;5000;30;80000;0;0;4;0;0.940801;21258.5;3.0086;4.16877
