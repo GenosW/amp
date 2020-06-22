@@ -61,13 +61,14 @@ int main(int argc, char *argv[]){
 	//// --- Taubenfeld
 	//Taubenfeld my_lock{num_threads};
 	//Taubenfeld_fix my_lock{num_threads};
+	//Taubenfeld_atomic my_lock{num_threads};
 
 	//// --- Aravind
 	//Aravind my_lock{ num_threads };
-	//Aravind_fix my_lock{ num_threads };
+	Aravind_fix my_lock{ num_threads };
 
 	//// --- Jayanti
-	Jayanti my_lock{ num_threads };
+	//Jayanti my_lock{ num_threads };
 	//Jayanti_BT my_lock{ num_threads };
 
 	// C++ Reference Lock	
@@ -333,7 +334,7 @@ int main(int argc, char *argv[]){
 	results.thp = result_thp[1];
 	results.thp_anc = result_thp[2]+1;
 	results.bm_runtime = bm_runtime;
-	string filepath = "results/results.csv";
+	string filepath = "results/results_" + my_lock.name + ".csv";
 	log_results(results, filepath);
 
 	if (comp_shared_counter_switch)

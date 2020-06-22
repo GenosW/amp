@@ -76,3 +76,9 @@ NUMA node7 CPU(s):   7,15,23,31,39,47,55,63
 Flags:               fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl nonstop_tsc cpuid extd_apicid amd_dcm aperfmperf pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb hw_pstate sme ssbd sev ibpb vmmcall fsgsbase bmi1 avx2 smep bmi2 rdseed adx smap clflushopt sha_ni xsaveopt xsavec xgetbv1 xsaves clzero irperf xsaveerptr arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif overflow_recov succor smca
 
 
+
+### Shell 
+
+```shell
+./bin/project2 2 10000 30 400 4000 0.1 && ./bin/project2 3 6800 30 400 4000 0.1 && ./bin/project2 4 5000 30 400 4000 0.1 && ./bin/project2 5 4000 30 400 4000 0.1 && ./bin/project2 6 3000 30 400 4000 0.1 && ./bin/project2 7 2000 30 400 4000 0.1 && ./bin/project2 8 1000 30 400 4000 0.1
+```
