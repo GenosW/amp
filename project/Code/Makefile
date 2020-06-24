@@ -1,5 +1,5 @@
 CC := g++ # This is the main compiler
-# CC := clang --analyze # and comment out the linker last line for sanity
+# CC := clang --analyze
 SRCDIR := source
 BUILDDIR := build
 PROG = project2
@@ -35,3 +35,8 @@ clean:
 	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -r $(BUILDDIR) $(TARGET)
 
 .PHONY: clean
+
+
+# Project structure + Makefile adapted from:
+# Hilton Lipschitz 2013, https://hiltmon.com/blog/2013/07/03/a-simple-c-plus-plus-project-structure/
+# "Don't reinvent the wheel!"
