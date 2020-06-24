@@ -66,10 +66,10 @@ int main(int argc, char *argv[]){
 
 	//// --- Aravind
 	//Aravind my_lock{ num_threads };
-	Aravind_fix my_lock{ num_threads };
+	//Aravind_fix my_lock{ num_threads };
 
 	//// --- Jayanti
-	//Jayanti my_lock{ num_threads };
+	Jayanti my_lock{ num_threads };
 	//Jayanti_BT my_lock{ num_threads };
 
 	// C++ Reference Lock	
@@ -80,7 +80,7 @@ int main(int argc, char *argv[]){
 	int mutex_fail_count, fcfs_fail_count, lru_fail_count;
 	double average_time_el1, average_time_el2; //, anc;
 	// throughput with det_anc
-	double result_thp[num_tests][3] = { -1 };
+	double result_thp[3] = { -1 };
 	//struct bm_results results[num_tests]{ {my_lock.name, num_threads,num_turns, num_tests, num_events} };
 	std::vector<struct bm_results> results(num_tests, {my_lock.name, num_threads,num_turns, num_tests, num_events});
 	double* time_el1;
@@ -179,24 +179,24 @@ int main(int argc, char *argv[]){
 		time_el1 = new double[num_tests]{0};
 		for (int i = 0; i < num_tests; i++) {
 			throughput(&my_lock,
-					&result_thp[i][0],
+					&result_thp[0],
 					num_threads,
 					num_turns,
 					workload,
 					cs_workload,
 					randomness,
 					true);
-			time_el1[i] = *result_thp[0];
-			results[i].thp_runtime_wanc = *result_thp[0];
-			results[i].thp_wanc = *result_thp[1];
-			results[i].anc = *result_thp[2];
+			time_el1[i] = result_thp[0];
+			results[i].thp_runtime_wanc = result_thp[0];
+			results[i].thp_wanc = result_thp[1];
+			results[i].anc = result_thp[2];
 		}
 #ifdef DESKTOP
-		printf("runtime (s) = %.4f\n", *result_thp[0]);
-		printf("throughput (acq/s) = %.4f\n", *result_thp[1]);
+		printf("runtime (s) = %.4f\n", result_thp[0]);
+		printf("throughput (acq/s) = %.4f\n", result_thp[1]);
 		printf("average number of \"other\" contenders (#thr) = %.4f\n", 
-				*result_thp[2]);
-		printf("average number of contenders (#thr) = %.4f\n", *result_thp[2]+1);
+				result_thp[2]);
+		printf("average number of contenders (#thr) = %.4f\n", result_thp[2]+1);
 #endif
 		average_time_el1 = array_average(time_el1, num_tests);
 #ifdef DESKTOP
@@ -220,7 +220,7 @@ int main(int argc, char *argv[]){
 				// 	randomness,
 				// 	0);
 				throughput(&my_lock,
-						&result_thp[i][0],
+						&result_thp[0],
 						num_threads,
 						num_turns,
 						workload,
@@ -228,9 +228,9 @@ int main(int argc, char *argv[]){
 						randomness,
 						false);
 				
-				time_el1[i] = *result_thp[0];
-				results[i].thp_runtime_ref = *result_thp[0];
-				results[i].thp_ref = *result_thp[1];
+				time_el1[i] = result_thp[0];
+				results[i].thp_runtime_ref = result_thp[0];
+				results[i].thp_ref = result_thp[1];
 // #ifdef DESKTOP
 // 			printf("time elapsed in seconds = %.5f\n", time_el2[i]);
 // #endif
@@ -262,11 +262,11 @@ int main(int argc, char *argv[]){
 	printf("fcfs_fail_count = %d\n", fcfs_fail_count);
 	printf("lru_fail_count = %d\n", lru_fail_count);
 	//if (anc_switch) printf("anc (anc test): %f\n", anc);
-	printf("runtime (s) = %.4f\n", *result_thp[0]);
-	printf("throughput (acq/s) = %.4f\n", *result_thp[1]);
+	printf("runtime (s) = %.4f\n", result_thp[0]);
+	printf("throughput (acq/s) = %.4f\n", result_thp[1]);
 	printf("average number of \"other\" contenders (#thr) = %.4f\n", 
-			*result_thp[2]);
-	printf("average number of contenders (#thr) = %.4f\n", *result_thp[2]+1);
+			result_thp[2]);
+	printf("average number of contenders (#thr) = %.4f\n", result_thp[2]+1);
 	bm_runtime = omp_get_wtime() - bm_runtime;
 	int mins, secs, milisecs;
 	seconds_to_m_s_ms(bm_runtime, mins, secs, milisecs);
