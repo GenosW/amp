@@ -248,17 +248,24 @@ struct bm_results
 	int mutex_fail_count;
 	int fcfs_fail_count;
 	int lru_fail_count;
-	double anc;
 	double thp_runtime;
 	double thp;
 	double thp_anc;
 	double bm_runtime;
 	// With this, you can control the seperation char for the insertion operator <<
-	string insertion_sep=";";
+	std::string insertion_sep=";";
 
-	bm_results(string name, int th, int turns, int tests, int events) : lock_name(name), 
+	bm_results(std::string name, int th, int turns, int tests, int events) : lock_name(name), 
 				num_threads(th), num_turns(turns), num_tests(tests), num_events(events)
-	{}
+	{
+		mutex_fail_count = -1;
+		fcfs_fail_count = -1;
+		lru_fail_count = -1;
+		thp_runtime = -1;
+		thp = -1;
+		thp_anc = -1;
+		bm_runtime = -1;
+	}
 
 	friend std::ostream& operator <<(std::ostream& os, bm_results const& a)
     {
@@ -270,7 +277,6 @@ struct bm_results
 	              << a.mutex_fail_count << a.insertion_sep
 	              << a.fcfs_fail_count << a.insertion_sep
 	              << a.lru_fail_count << a.insertion_sep
-	              << a.anc << a.insertion_sep
 	              << a.thp_runtime << a.insertion_sep
 	              << a.thp << a.insertion_sep
 				  << a.thp_anc << a.insertion_sep
@@ -278,7 +284,7 @@ struct bm_results
     }
 };
 
-string log_results(bm_results results, string path, std::ios_base::openmode flags=std::fstream::out | std::fstream::app)
+string log_results(bm_results results, std::string path, std::ios_base::openmode flags=std::fstream::out | std::fstream::app)
 {
 	ofstream outfile;
 	// Open file for writing and appending
