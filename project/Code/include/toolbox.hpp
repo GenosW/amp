@@ -248,9 +248,11 @@ struct bm_results
 	int mutex_fail_count;
 	int fcfs_fail_count;
 	int lru_fail_count;
-	double thp_runtime;
-	double thp;
-	double thp_anc;
+	double thp_runtime_wanc;
+	double thp_wanc;
+	double anc;
+	double thp_runtime_ref;
+	double thp_ref;
 	double bm_runtime;
 	// With this, you can control the seperation char for the insertion operator <<
 	std::string insertion_sep=";";
@@ -261,9 +263,11 @@ struct bm_results
 		mutex_fail_count = -1;
 		fcfs_fail_count = -1;
 		lru_fail_count = -1;
-		thp_runtime = -1;
-		thp = -1;
-		thp_anc = -1;
+		thp_runtime_wanc = -1;
+		thp_wanc = -1;
+		anc = -1;
+		thp_runtime_ref = -1;
+		thp_ref = -1;
 		bm_runtime = -1;
 	}
 
@@ -277,18 +281,40 @@ struct bm_results
 	              << a.mutex_fail_count << a.insertion_sep
 	              << a.fcfs_fail_count << a.insertion_sep
 	              << a.lru_fail_count << a.insertion_sep
-	              << a.thp_runtime << a.insertion_sep
-	              << a.thp << a.insertion_sep
-				  << a.thp_anc << a.insertion_sep
+	              << a.thp_runtime_wanc << a.insertion_sep
+	              << a.thp_wanc << a.insertion_sep
+				  << a.anc << a.insertion_sep
+	              << a.thp_runtime_ref << a.insertion_sep
+	              << a.thp_ref << a.insertion_sep
 				  << a.bm_runtime;
     }
 };
 
-string log_results(bm_results results, std::string path, std::ios_base::openmode flags=std::fstream::out | std::fstream::app)
+string log_results(bm_results results, std::string path, std::ios_base::openmode flag=std::fstream::app)
 {
 	ofstream outfile;
 	// Open file for writing and appending
-	outfile.open(path, flags);
+	outfile.open(path, std::fstream::out | flag);
+	if (flag==std::fstream::trunc)
+	{
+		//write header
+		std::string sep = results.insertion_sep;
+		std::string header = "lock_name";
+		header += sep+"num_threads";
+		header += sep+"num_turns";
+		header += sep+"num_tests";
+		header += sep+"num_events"; 
+		header += sep+"mutex_fail_count";
+		header += sep+"fcfs_fail_count";
+		header += sep+"lru_fail_count";
+		header += sep+"thp_runtime_wanc";
+		header += sep+"thp_wanc";
+		header += sep+"anc";
+		header += sep+"thp_runtime_ref";
+		header += sep+"thp_ref";
+		header += sep+"bm_runtime";
+		outfile << header << endl;
+	}
 	// outfile has format:
 	// string lock_name; num_threads; num_turns; num_tests; num_events; mutex_fail_coun; 
 	// fcfs_fail_count; lru_fail_count; anc; thp_runtime; thp; thp_anc; bm_runtime

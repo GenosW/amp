@@ -1,8 +1,1 @@
-lock_name; num_threads; num_turns; num_tests; num_events; mutex_fail_count; fcfs_fail_count; lru_fail_count; anc; thp_runtime; thp; thp_anc; bm_runtime
-Aravind_fix;2;10000;30;80000;0;1;0;0;0.876789;22810.5;1.0022;3.911
-Aravind_fix;3;6800;30;81600;0;26;0;0;0.903359;22582.4;2.00299;3.9544
-Aravind_fix;4;5000;30;80000;0;12;0;0;0.987197;20259.4;3.0072;4.19269
-Aravind_fix;5;4000;30;80000;0;11;0;0;71.6385;279.18;4.37805;315.376
-Aravind_fix;6;3000;30;72000;0;22;0;0;124.389;144.707;5.52828;500.821
-Aravind_fix;7;2000;30;56000;0;14;0;0;126.728;110.473;6.25657;532.551
-Aravind_fix;8;1000;30;32000;0;16;0;0;105.517;75.8171;7.44725;361.551
+lock_name; num_threads; num_turns; num_tests; num_events; mutex_fail_count; fcfs_fail_count; lru_fail_count; thp_runtime; thp; thp_anc; bm_runtime

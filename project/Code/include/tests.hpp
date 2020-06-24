@@ -540,7 +540,7 @@ int test_fcfs(DW_Lock* test_lock, int num_threads,
 	// run the test
 	// =====================
 	double start, stop;
-	bool display_time = true;
+	bool display_time = false;
 	if (display_time) {
 		printf("running test... \n");
 		start = omp_get_wtime();
@@ -1120,15 +1120,15 @@ void throughput(DW_Lock* test_lock, double* result, int num_threads,
 	int test_case;
 	if (det_anc) test_case = 0; // full logging (shared counter variable)
 	else test_case = 2;			// skip all logging (no shared counter)
-	printf("test_case = %i\n", test_case);
+	//printf("test_case = %i\n", test_case);
 
 	// allocate event_log
 	int num_events = num_threads * num_turns * 4;
-	printf("will now allocate event_log\n");
+	//printf("will now allocate event_log\n");
 	int* event_log = new int[num_events*2];
 
 	// run threads through the lock
-	printf("will now run test\n");
+	//printf("will now run test\n");
  
 	result[0] = record_event_log(event_log,
 								test_lock, 
@@ -1136,7 +1136,8 @@ void throughput(DW_Lock* test_lock, double* result, int num_threads,
 								num_turns,
 								workload, 
 								cs_workload, 
-								randomness
+								randomness,
+								test_case
 								);
 
 	int num_acquisitions = num_threads * num_turns;

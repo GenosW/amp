@@ -82,3 +82,15 @@ Flags:               fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cm
 ```shell
 ./bin/project2 2 10000 30 400 4000 0.1 && ./bin/project2 3 6800 30 400 4000 0.1 && ./bin/project2 4 5000 30 400 4000 0.1 && ./bin/project2 5 4000 30 400 4000 0.1 && ./bin/project2 6 3000 30 400 4000 0.1 && ./bin/project2 7 2000 30 400 4000 0.1 && ./bin/project2 8 1000 30 400 4000 0.1
 ```
+
+New: 
+
+```shell
+./bin/project2 2 1000 10 400 4000 0.1 && ./bin/project2 3 680 10 400 4000 0.1 && ./bin/project2 4 500 10 400 4000 0.1 && ./bin/project2 5 200 10 400 4000 0.1 && ./bin/project2 6 150 10 400 4000 0.1 && ./bin/project2 7 100 10 400 4000 0.1 && ./bin/project2 8 50 10 400 4000 0.1
+```
+
+Copy:
+
+```shell
+./bin/project2 2 1000 10 400 4000 0.1 && ./bin/project2 3 680 10 400 4000 0.1 && ./bin/project2 4 500 10 400 4000 0.1 && ./bin/project2 5 200 10 400 4000 0.1 && ./bin/project2 6 150 10 400 4000 0.1 && ./bin/project2 7 100 10 400 4000 0.1 && ./bin/project2 8 50 10 400 4000 0.1
+```
