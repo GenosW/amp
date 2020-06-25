@@ -30,6 +30,12 @@ public:
 			label[i] = 0;
 		}
 	}
+	~Lamport_Lecture()
+	{
+		printf("Deleting %s...\n", name.c_str());
+		delete[] flag;
+		delete[] label;
+	}
 
 	// make that one virtual so a subclass can
 	// override it with its own function
@@ -125,6 +131,12 @@ public:
 	{
 		latest_ticket = 0;
 	}
+	~Lamport_Lecture_fix()
+	{
+		printf("Deleting %s...\n", name.c_str());
+		delete[] flag;
+		delete[] label;
+	}
 
 private:
 	virtual int draw_ticket() override
@@ -157,6 +169,13 @@ public:
 			gettoken[i] = false;
 			token[i] = -1;
 		}
+	}
+
+	~Lamport_Original()
+	{
+		printf("Deleting %s...\n", name.c_str());
+		delete[] gettoken;
+		delete[] token;
 	}
 
 private:
@@ -252,6 +271,13 @@ public:
 			flag[i] = false;
 			label[i] = 0;
 		}
+	}
+
+	~Lamport_Lecture_atomic()
+	{		
+		printf("Deleting %s...\n", name.c_str());
+		delete[] flag;
+		delete[] label;
 	}
 
 	// make that one virtual so a subclass can

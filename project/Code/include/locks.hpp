@@ -50,6 +50,11 @@ public:
 		std::atomic_flag lock_stream = ATOMIC_FLAG_INIT;
 	}
 
+	~Reference_Lock()
+	{
+		printf("Deleting %s...\n", name.c_str());
+	}
+
 public:
 	void doorway()
 	{

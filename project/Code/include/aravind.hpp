@@ -33,6 +33,13 @@ public:
 			ts[i] = i;
 		}
 	}
+	~Aravind()
+	{
+		printf("Deleting %s...\n", name.c_str());
+		delete[] c;
+		delete[] stage;
+		delete[] ts;
+	}
 
 private:
 	virtual int new_ts()
@@ -152,6 +159,14 @@ public:
 public:
 	Aravind_fix(int n) : Aravind{ n }
 	{
+	}
+
+	~Aravind_fix()
+	{
+		printf("Deleting %s...\n", name.c_str());
+		delete[] c;
+		delete[] stage;
+		delete[] ts;
 	}
 
 protected:

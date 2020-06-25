@@ -1,0 +1,11 @@
+lock_name;num_threads;num_turns;num_tests;num_events;mutex_fail_count;fcfs_fail_count;lru_fail_count;thp_runtime_wanc;thp_wanc;anc;thp_runtime_ref;thp_ref;bm_runtime
+Lamport_Lecture_atomic;8;50;10;1600;0;0;6;3.52518;113.469;4.7;0.0179719;22257;34.7355
+Lamport_Lecture_atomic;8;50;10;1600;0;0;1;0.01839;21751;1.995;4.29628;93.1039;34.7355
+Lamport_Lecture_atomic;8;50;10;1600;0;0;1;0.0185111;21608.7;1.9925;0.970908;411.985;34.7355
+Lamport_Lecture_atomic;8;50;10;1600;0;0;15;0.0203758;19631.1;1.9925;0.0184728;21653.5;34.7355
+Lamport_Lecture_atomic;8;50;10;1600;0;0;1;4.00666;99.8339;5.6875;0.0184259;21708.6;34.7355
+Lamport_Lecture_atomic;8;50;10;1600;0;0;1;1.21859;328.247;3.22;0.0182356;21935.1;34.7355
+Lamport_Lecture_atomic;8;50;10;1600;0;0;16;0.0183913;21749.4;1.9725;2.67075;149.771;34.7355
+Lamport_Lecture_atomic;8;50;10;1600;0;0;1;0.0184253;21709.3;1.995;0.0183573;21789.7;34.7355
+Lamport_Lecture_atomic;8;50;10;1600;0;0;7;0.108407;3689.81;2.075;0.0186548;21442.2;34.7355
+Lamport_Lecture_atomic;8;50;10;1600;0;0;1;0.0184701;21656.6;1.9975;0.0181782;22004.4;34.7355

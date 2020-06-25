@@ -1,0 +1,11 @@
+lock_name;num_threads;num_turns;num_tests;num_events;mutex_fail_count;fcfs_fail_count;lru_fail_count;thp_runtime_wanc;thp_wanc;anc;thp_runtime_ref;thp_ref;bm_runtime
+Taubenfeld_Paper_1_atomic;5;200;10;4000;0;0;3;2.7334;365.844;2.689;3.12258;320.248;134.85
+Taubenfeld_Paper_1_atomic;5;200;10;4000;0;0;3;2.69788;370.662;2.79;5.6289;177.655;134.85
+Taubenfeld_Paper_1_atomic;5;200;10;4000;0;0;4;2.96643;337.105;2.885;2.05549;486.503;134.85
+Taubenfeld_Paper_1_atomic;5;200;10;4000;0;0;3;1.58077;632.604;2.122;4.04491;247.224;134.85
+Taubenfeld_Paper_1_atomic;5;200;10;4000;0;0;5;2.06989;483.118;2.279;1.26384;791.236;134.85
+Taubenfeld_Paper_1_atomic;5;200;10;4000;0;0;7;4.26073;234.702;3.387;2.57032;389.056;134.85
+Taubenfeld_Paper_1_atomic;5;200;10;4000;0;0;5;3.70783;269.699;3.216;2.84685;351.266;134.85
+Taubenfeld_Paper_1_atomic;5;200;10;4000;0;0;3;3.90844;255.857;2.959;3.81003;262.465;134.85
+Taubenfeld_Paper_1_atomic;5;200;10;4000;0;0;5;0.797782;1253.47;1.066;3.64027;274.705;134.85
+Taubenfeld_Paper_1_atomic;5;200;10;4000;0;0;3;2.674;373.972;2.703;3.36581;297.105;134.85

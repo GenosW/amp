@@ -55,26 +55,25 @@ int main(int argc, char *argv[]){
 	////--------------- Locks ---------------////
 	//// --- Lamport
 	//Lamport_Lecture my_lock {num_threads};
-	//Lamport_Lecture_fix my_lock{ num_threads };
+	// Lamport_Lecture_fix my_lock{ num_threads };
 	//Lamport_Lecture_atomic my_lock{ num_threads };
 	//Lamport_Original my_lock{ num_threads };
 
 	//// --- Taubenfeld
 	//Taubenfeld my_lock{num_threads};
-	//Taubenfeld_fix my_lock{num_threads};
+	// Taubenfeld_fix my_lock{num_threads};
 	//Taubenfeld_atomic my_lock{num_threads};
 
 	//// --- Aravind
-	//Aravind my_lock{ num_threads };
+	// Aravind my_lock{ num_threads };
 	//Aravind_fix my_lock{ num_threads };
 
 	//// --- Jayanti
-	Jayanti my_lock{ num_threads };
-	//Jayanti_BT my_lock{ num_threads };
+	//Jayanti my_lock{ num_threads };
+	Jayanti_BT my_lock{ num_threads };
 
 	// C++ Reference Lock	
-	//printf("calling my_test()\n");
-	//my_lock.my_test();
+	//Reference_Lock my_lock;
 
 	////--------------- RESULTS ---------------////
 	int mutex_fail_count, fcfs_fail_count, lru_fail_count;

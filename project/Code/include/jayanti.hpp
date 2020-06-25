@@ -196,6 +196,8 @@ public:
 	~Jayanti_BT(void)
 	{
 		printf("Deleting %s...\n", name.c_str());
+		delete[] gettoken;
+		delete[] token;
 	}
 
 private:
