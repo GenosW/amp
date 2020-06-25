@@ -61,7 +61,6 @@ int main(int argc, char *argv[]){
 
 	//// --- Taubenfeld
 	//Taubenfeld my_lock{num_threads};
-	// Taubenfeld_fix my_lock{num_threads};
 	//Taubenfeld_atomic my_lock{num_threads};
 
 	//// --- Aravind
