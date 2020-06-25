@@ -78,7 +78,7 @@ int main(int argc, char *argv[]){
 	int mutex_fail_count, fcfs_fail_count, lru_fail_count;
 	double average_time_el1, average_time_el2; //, anc;
 	// throughput with det_anc
-	double result_thp[3] = { -1 };
+	double result_thp[3] = { -1 }, result_thp_wo[3] = { -1 };
 	//struct bm_results results[num_tests]{ {my_lock.name, num_threads,num_turns, num_tests, num_events} };
 	std::vector<struct bm_results> results(num_tests, {my_lock.name, num_threads,num_turns, num_tests, num_events});
 	double* time_el1;
@@ -218,7 +218,7 @@ int main(int argc, char *argv[]){
 				// 	randomness,
 				// 	0);
 				throughput(&my_lock,
-						&result_thp[0],
+						&result_thp_wo[0],
 						num_threads,
 						num_turns,
 						workload,
@@ -226,9 +226,9 @@ int main(int argc, char *argv[]){
 						randomness,
 						false);
 				
-				time_el1[i] = result_thp[0];
-				results[i].thp_runtime_ref = result_thp[0];
-				results[i].thp_ref = result_thp[1];
+				time_el1[i] = result_thp_wo[0];
+				results[i].thp_runtime_ref = result_thp_wo[0];
+				results[i].thp_ref = result_thp_wo[1];
 // #ifdef DESKTOP
 // 			printf("time elapsed in seconds = %.5f\n", time_el2[i]);
 // #endif

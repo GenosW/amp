@@ -273,6 +273,9 @@ struct bm_results
 
 	friend std::ostream& operator <<(std::ostream& os, bm_results const& a)
     {
+		//lock_name;num_threads;num_turns;num_tests;num_events;mutex_fail_count;fcfs_fail_count;
+		//lru_fail_count;thp_runtime_wanc;thp_wanc;anc;thp_runtime_ref;thp_ref;bm_runtime
+
         return os << a.lock_name << a.insertion_sep
 	        	  << a.num_threads << a.insertion_sep
 	              << a.num_turns << a.insertion_sep
