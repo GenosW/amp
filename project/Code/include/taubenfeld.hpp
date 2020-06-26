@@ -1,6 +1,7 @@
 #pragma once
 #include "locks.hpp"
 #include "toolbox.hpp"
+#include <set>
 //#define LOCK_MSG
 
 struct BWTicket
@@ -276,7 +277,7 @@ struct BWTicket_atomic
 class Taubenfeld_atomic : public DW_Lock
 {
 public:
-	string name = "Taubenfeld_Paper_1_atomic";
+	std::string name = "Taubenfeld_Paper_1_atomic";
 
 protected:
 	std::atomic <bool> lock_color;
@@ -423,6 +424,222 @@ public:
 		else
 			lock_color = false;
 		reset_ticket(id);
+	}
+};
+
+// struct Set
+// {
+// 	int size;
+// 	std::vector<int> members;
+
+// 	Set(){}
+
+// 	Set(int n): size(n)
+// 	{
+// 		members = std::vector<int>(size, -1);
+// 	}
+// 	Set(std::vector<int> vec): members(vec)
+// 	{
+// 		size = members.size();
+// 	}
+// 	~Set()
+// 	{
+// 	}
+
+// 	bool join(int tid)
+// 	{
+// 		for(int i=0; i<size; i++)
+// 		{
+// 			if (members[i] != 0) 
+// 			{
+// 				members[i] = tid;
+// 				return true; //successfully added
+// 			}
+// 		}
+// 		return false; //couldn't add because full ???
+// 	}
+
+// 	int leave(int tid)
+// 	{
+// 		for(int i=0; i<size; i++)
+// 		{
+// 			if (members[i] == tid) 
+// 			{
+// 				members[i] = -1;
+// 				return tid; //successfully left
+// 			}
+// 		}
+// 		return -1; //could not find tid in Set ???
+// 	}
+
+// 	std::vector<int> getset()
+// 	{
+// 		return members;
+// 	}
+
+// 	bool in(int j)
+// 	{
+// 		for(int i=0; i++;)
+// 	}
+// };
+
+
+class Taubenfeld_adaptive : public DW_Lock
+{
+protected:
+	std::atomic <bool> lock_color;
+	std::atomic <bool> *choosing;
+	BWTicket_atomic *tickets;
+	volatile bool inCS;
+	int size;
+	std::set<int> S;
+	//int fail;
+
+public:
+	string name = "Taubenfeld_adaptive";
+
+public:
+	Taubenfeld_adaptive(int n)
+	{
+		//fail = crash;
+		size = n;
+		inCS = false;
+		tickets = new BWTicket_atomic[n];
+		choosing = new std::atomic <bool>[n];
+		lock_color = true;
+
+		for (int i = 0; i < n; i++)
+		{
+			choosing[i] = false;
+			tickets[i].color = false;
+			tickets[i].number = 0;
+		}
+		printf("Tb adapt inited");
+	};
+	~Taubenfeld_adaptive()
+	{
+		printf("Deleting %s...\n", name.c_str());
+		delete[] choosing;
+		delete[] tickets;
+	};
+
+private:
+	virtual void take_ticket(int id, std::set<int> localS)
+	{
+		tickets[id].color = lock_color.load();
+		volatile int new_number = 0;
+		for (auto i : localS)
+		{
+			if (tickets[i].color == tickets[id].color)
+			{
+				volatile int dummy = tickets[i].number;
+				new_number = std::max(new_number, dummy);
+			}
+		}
+		tickets[id].number = new_number + 1;
+	}
+
+	virtual void reset_ticket(int id)
+	{
+		tickets[id].number = 0; // Set ticket number to zero
+	}
+
+	bool keep_waiting(int id, std::set<int> localS)
+	{
+		for (auto j : localS)
+		{
+			//while (choosing[j]) {}
+			// if not choosing and tickets.number_j < tickets.number_id									|| !gettickets.number[j]
+			if (tickets[id].color.load()==tickets[j].color.load() )
+			{
+				if ((lex_lesser_than2(tickets[j].number.load(), j, tickets[id].number.load(), id) && tickets[j].number.load()!=0) || choosing[j].load()) //(lex_less(tickets[j].color, tickets[j].number, j, tickets[id].color, tickets[id].number, id) || choosing[j]))
+				{
+					return true;
+				}
+			}
+			else // color is different --> here it matters who has same color as lock_color
+			{
+				if (tickets[j].color.load() !=lock_color || choosing[j].load())
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+public:
+	void doorway()
+	{
+		//printf("dw");
+		int id = omp_get_thread_num();
+		S.insert(id);
+
+#ifdef LOCK_MSG
+		printf("thread %i TRIES to acquire the lock\n", id);
+#endif
+		choosing[id] = true;
+		std::set<int> localS = S;
+		localS.erase(id);
+		take_ticket(id, localS); // Ticket is colored inside function
+		choosing[id] = false;
+
+#ifdef LOCK_MSG
+		printf("(mycolor, number)[%i] = (%i, %i)\n", id, tickets[id].color, tickets[id].number);
+#endif
+	}
+
+	void wait()
+	{
+		int id = omp_get_thread_num();
+		std::set<int> localS = S;
+		localS.erase(id);
+
+		for (auto j : localS)
+		{
+
+			while (choosing[j])
+			{
+			} // wait until it is done choosing
+			if (tickets[j].color == tickets[id].color)
+			{
+				// while (! (tickets[j].number == 0 || lex_geq(tickets[j].color, tickets[j].number, tickets[id].color, tickets[id].number) || tickets[j].color != tickets[id].color) )
+				while (!(tickets[j].number == 0 || lex_geq(tickets[j].color.load(), tickets[j].number.load(), j, tickets[id].color.load(), tickets[id].number.load(), id) || tickets[j].color.load() != tickets[id].color.load()))
+				{ /*wait*/
+				}
+			}
+			else
+			{
+				while (!(tickets[j].number.load() == 0 || tickets[id].color.load() != lock_color || tickets[j].color.load() == tickets[id].color.load()))
+				{ /*wait*/
+				}
+			}
+		}
+		// while (keep_waiting(id))
+		// {
+		// }
+		inCS = true;
+		//#ifdef LOCK_MSG
+		//printf("thread %i ACQUIRES the lock\n", id);
+		//#endif
+	}
+
+	void lock()
+	{
+		doorway();
+		wait();
+	}
+
+	void unlock()
+	{
+		int id = omp_get_thread_num();
+		if (tickets[id].color == false)
+			lock_color = true;
+		else
+			lock_color = false;
+		reset_ticket(id);
+		S.erase(id);
+		inCS = false;
 	}
 };
 

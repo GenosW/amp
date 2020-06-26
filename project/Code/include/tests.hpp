@@ -670,17 +670,18 @@ int test_mutex(Lock* test_lock, int num_threads,
 	// randomness ... number in [0,1] to randomize workload of 
 	//					work in non-CS
 	// print_to_console ... console output on/off
-
 	omp_set_num_threads(num_threads);
 
 	// counter keeps track of the logging position
 	int counter = 0;
 	// an event is acquisition of a lock or unlocking
 	int num_events = num_threads * num_turns * 2;
+	printf("Num_events: %d", num_events);
 	int* event_log = new int[num_events];
 
 	//initialize logging array
 	for (int i = 0; i < num_events; i++) event_log[i] = -1;
+		
 
 	// our lock for testing the test_lock object
 	std::atomic_flag lock_stream = ATOMIC_FLAG_INIT;	
@@ -697,7 +698,6 @@ int test_mutex(Lock* test_lock, int num_threads,
 	// seeds for randomizing the workload
 	int* random_seeds = new int[num_threads];
 	get_RNG_seeds(random_seeds, num_threads);
-
 	// do the test
 	//----------------
 	#pragma omp parallel
@@ -713,6 +713,9 @@ int test_mutex(Lock* test_lock, int num_threads,
 
 
 		for (int i = 0; i < num_turns; i++){
+			
+
+			//if (thread_id==0) printf("mt: %d\n",i);
 
 			test_lock->lock();
 

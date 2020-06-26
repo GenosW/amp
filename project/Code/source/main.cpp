@@ -55,13 +55,14 @@ int main(int argc, char *argv[]){
 	////--------------- Locks ---------------////
 	//// --- Lamport
 	//Lamport_Lecture my_lock {num_threads};
-	// Lamport_Lecture_fix my_lock{ num_threads };
+	Lamport_Lecture_fix my_lock{ num_threads };
 	//Lamport_Lecture_atomic my_lock{ num_threads };
 	//Lamport_Original my_lock{ num_threads };
 
 	//// --- Taubenfeld
 	//Taubenfeld my_lock{num_threads};
 	//Taubenfeld_atomic my_lock{num_threads};
+	//Taubenfeld_adaptive my_lock{num_threads};
 
 	//// --- Aravind
 	// Aravind my_lock{ num_threads };
@@ -69,7 +70,7 @@ int main(int argc, char *argv[]){
 
 	//// --- Jayanti
 	//Jayanti my_lock{ num_threads };
-	Jayanti_BT my_lock{ num_threads };
+	//Jayanti_BT my_lock{ num_threads };
 
 	// C++ Reference Lock	
 	//Reference_Lock my_lock;
@@ -81,8 +82,8 @@ int main(int argc, char *argv[]){
 	double result_thp[3] = { -1 }, result_thp_wo[3] = { -1 };
 	//struct bm_results results[num_tests]{ {my_lock.name, num_threads,num_turns, num_tests, num_events} };
 	std::vector<struct bm_results> results(num_tests, {my_lock.name, num_threads,num_turns, num_tests, num_events});
-	double* time_el1;
-	double* time_el2;
+	double* time_el1 = new double[num_tests]{0};
+	double* time_el2 = new double[num_tests]{0};
 
 
 	// Quick print to console that shows the configuration of the benchmark
@@ -103,8 +104,10 @@ int main(int argc, char *argv[]){
 		printf("\n######################\n");
 		printf("#     MUTEX TEST     #");
 		printf("\n######################\n");
+		printf("test\n");
 #endif
 		for (int i = 0; i < num_tests; i++) {
+			printf("%d\n", i);
 			mutex_fail_count = test_mutex(&my_lock,
 										num_threads,
 										num_turns,
@@ -174,7 +177,7 @@ int main(int argc, char *argv[]){
 		// runtime with dedicated throughput function
 		printf("\ndesignated throughput test\n");
 		printf("---------------------------------------------------\n");
-		time_el1 = new double[num_tests]{0};
+		// time_el1 = new double[num_tests]{0};
 		for (int i = 0; i < num_tests; i++) {
 			throughput(&my_lock,
 					&result_thp[0],
@@ -207,7 +210,7 @@ int main(int argc, char *argv[]){
 			printf("---------------------------------------------------\n");
 #endif
 			int* event_log2 = new int[num_events * 2];
-			time_el2 = new double[num_tests];
+			//time_el2 = new double[num_tests];
 			for (int i = 0; i < num_tests; i++) {
 				// time_el2[i] = record_event_log(event_log2,
 				// 	&my_lock,

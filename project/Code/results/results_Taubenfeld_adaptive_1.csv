@@ -1,2 +1,2 @@
 lock_name;num_threads;num_turns;num_tests;num_events;mutex_fail_count;fcfs_fail_count;lru_fail_count;thp_runtime_wanc;thp_wanc;anc;thp_runtime_ref;thp_ref;bm_runtime
-Lamport_Lecture_fix;4;20000;1;320000;0;0;16;0.0709187;1.12805e+06;1.98651;0.0539675;1.48237e+06;0.456668
+Taubenfeld_adaptive;1;200;1;800;0;0;0;0.0004293;465875;0;0.0003775;529801;0.0039302
