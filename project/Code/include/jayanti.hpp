@@ -38,7 +38,9 @@ public:
 	}
 	~Jayanti(void)
 	{
+#ifdef DESKTOP
 		printf("Deleting %s...\n", name.c_str());
+#endif
 		delete[] gettoken;
 		delete[] token;
 	}
@@ -195,9 +197,9 @@ public:
 	{}
 	~Jayanti_BT(void)
 	{
+#ifdef DESKTOP
 		printf("Deleting %s...\n", name.c_str());
-		delete[] gettoken;
-		delete[] token;
+#endif
 	}
 
 private:

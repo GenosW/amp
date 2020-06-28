@@ -32,7 +32,9 @@ public:
 	}
 	~Lamport_Lecture()
 	{
+#ifdef DESKTOP
 		printf("Deleting %s...\n", name.c_str());
+#endif
 		delete[] flag;
 		delete[] label;
 	}
@@ -133,9 +135,11 @@ public:
 	}
 	~Lamport_Lecture_fix()
 	{
+#ifdef DESKTOP
 		printf("Deleting %s...\n", name.c_str());
-		delete[] flag;
-		delete[] label;
+#endif
+		// delete[] flag;
+		// delete[] label;
 	}
 
 private:
@@ -173,7 +177,9 @@ public:
 
 	~Lamport_Original()
 	{
+#ifdef DESKTOP
 		printf("Deleting %s...\n", name.c_str());
+#endif
 		delete[] gettoken;
 		delete[] token;
 	}
@@ -275,7 +281,9 @@ public:
 
 	~Lamport_Lecture_atomic()
 	{		
+#ifdef DESKTOP
 		printf("Deleting %s...\n", name.c_str());
+#endif
 		delete[] flag;
 		delete[] label;
 	}

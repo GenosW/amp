@@ -13,7 +13,7 @@
 void print_log(int* array, int cols, int rows);
 
 template<typename T>
-T convertTo(const int position, const T init, int argc, char *argv[]);
+T convertTo(const int position, const T init, int argc, char *argv[], int debug=0);
 
 template <typename myT>
 bool isequal(myT *array1, myT *array2, int length);
@@ -55,22 +55,26 @@ void print_log(int* array, int cols, int rows) {
 }
 
 template<typename T>
-T convertTo(const int position, const T init, int argc, char *argv[]) {
-  if (argc <= position) {
-    std::cout
-        << "Conversion of argument " << position
-        << " failed, not enough parameters, using default parameter: "
-        << init << std::endl;
-    return init;
-  }
-  T arg;
-  std::istringstream tmp(argv[position]);
-  tmp >> arg;
-  // tmp >> arg ?  (std::cout << "Conversion of argument " << position << "  successfull: " << arg)
-  //               : (std::cout << "Conversion of argument " << position
-  //                            << "  failed");
+T convertTo(const int position, const T init, int argc, char *argv[], int debug) {
+  if (argc <= position) 
+	{
+	if (debug)
+		{
+		std::cout
+			<< "Conversion of argument " << position
+			<< " failed, not enough parameters, using default parameter: "
+			<< init << std::endl;
+		}
+	return init;
+	}
+	T arg;
+	std::istringstream tmp(argv[position]);
+	tmp >> arg;
+	// tmp >> arg ?  (std::cout << "Conversion of argument " << position << "  successfull: " << arg)
+	//               : (std::cout << "Conversion of argument " << position
+	//                            << "  failed");
 
-  return arg;
+	return arg;
 }
 
 template <typename myT>
@@ -271,6 +275,26 @@ struct bm_results
 		bm_runtime = -1;
 	}
 
+	std::string getHeader()
+	{
+		std::string sep = insertion_sep;
+		std::string header = "lock_name";
+		header += sep+"num_threads";
+		header += sep+"num_turns";
+		header += sep+"num_tests";
+		header += sep+"num_events"; 
+		header += sep+"mutex_fail_count";
+		header += sep+"fcfs_fail_count";
+		header += sep+"lru_fail_count";
+		header += sep+"thp_runtime_wanc";
+		header += sep+"thp_wanc";
+		header += sep+"anc";
+		header += sep+"thp_runtime_ref";
+		header += sep+"thp_ref";
+		header += sep+"bm_runtime";
+		return header;
+	}
+
 	friend std::ostream& operator <<(std::ostream& os, bm_results const& a)
     {
 		//lock_name;num_threads;num_turns;num_tests;num_events;mutex_fail_count;fcfs_fail_count;
@@ -301,21 +325,22 @@ string log_results(bm_results results, std::string path, std::ios_base::openmode
 	if (flag==std::fstream::trunc)
 	{
 		//write header
-		std::string sep = results.insertion_sep;
-		std::string header = "lock_name";
-		header += sep+"num_threads";
-		header += sep+"num_turns";
-		header += sep+"num_tests";
-		header += sep+"num_events"; 
-		header += sep+"mutex_fail_count";
-		header += sep+"fcfs_fail_count";
-		header += sep+"lru_fail_count";
-		header += sep+"thp_runtime_wanc";
-		header += sep+"thp_wanc";
-		header += sep+"anc";
-		header += sep+"thp_runtime_ref";
-		header += sep+"thp_ref";
-		header += sep+"bm_runtime";
+		// std::string sep = results.insertion_sep;
+		// std::string header = "lock_name";
+		// header += sep+"num_threads";
+		// header += sep+"num_turns";
+		// header += sep+"num_tests";
+		// header += sep+"num_events"; 
+		// header += sep+"mutex_fail_count";
+		// header += sep+"fcfs_fail_count";
+		// header += sep+"lru_fail_count";
+		// header += sep+"thp_runtime_wanc";
+		// header += sep+"thp_wanc";
+		// header += sep+"anc";
+		// header += sep+"thp_runtime_ref";
+		// header += sep+"thp_ref";
+		// header += sep+"bm_runtime";
+		std::string header = results.getHeader();
 		outfile << header << endl;
 	}
 	// outfile has format:

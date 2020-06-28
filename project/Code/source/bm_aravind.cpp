@@ -87,7 +87,7 @@ int main(int argc, char *argv[]){
 	//// --- Lamport
 	//Lamport_Lecture my_lock {num_threads};
 	// Lamport_Lecture_fix my_lock{ num_threads };
-	Lamport_Lecture_atomic my_lock{ num_threads };
+	// Lamport_Lecture_atomic my_lock{ num_threads };
 	//Lamport_Original my_lock{ num_threads };
 
 	//// --- Taubenfeld
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]){
 
 	//// --- Aravind
 	// Aravind my_lock{ num_threads };
-	// Aravind_fix my_lock{ num_threads };
+	Aravind_fix my_lock{ num_threads };
 
 	//// --- Jayanti
 	//Jayanti my_lock{ num_threads };

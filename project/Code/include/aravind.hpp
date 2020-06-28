@@ -35,7 +35,9 @@ public:
 	}
 	~Aravind()
 	{
+#ifdef DESKTOP
 		printf("Deleting %s...\n", name.c_str());
+#endif
 		delete[] c;
 		delete[] stage;
 		delete[] ts;
@@ -163,10 +165,9 @@ public:
 
 	~Aravind_fix()
 	{
+#ifdef DESKTOP
 		printf("Deleting %s...\n", name.c_str());
-		delete[] c;
-		delete[] stage;
-		delete[] ts;
+#endif
 	}
 
 protected:

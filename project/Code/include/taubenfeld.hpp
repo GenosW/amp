@@ -1,7 +1,7 @@
 #pragma once
 #include "locks.hpp"
 #include "toolbox.hpp"
-#include <set>
+#include <vector>
 //#define LOCK_MSG
 
 struct BWTicket
@@ -78,7 +78,9 @@ public:
 	};
 	~Taubenfeld()
 	{
+#ifdef DESKTOP
 		printf("Deleting %s...\n", name.c_str());
+#endif
 		delete[] choosing;
 		delete[] tickets;
 	};
@@ -222,7 +224,9 @@ public:
 	}
 	~Taubenfeld_fix()
 	{
+#ifdef DESKTOP
 		printf("Deleting %s...\n", name.c_str());
+#endif
 	}
 
 private:
@@ -302,7 +306,9 @@ public:
 	};
 	~Taubenfeld_atomic()
 	{
+#ifdef DESKTOP
 		printf("Deleting %s...\n", name.c_str());
+#endif
 		delete[] choosing;
 		delete[] tickets;
 	};
@@ -369,7 +375,7 @@ public:
 		choosing[id] = false;
 
 #ifdef LOCK_MSG
-		printf("(mycolor, number)[%i] = (%i, %i)\n", id, tickets[id].color, tickets[id].number);
+		printf("(mycolor, number)[%i] = (%i, %i)\n", id, tickets[id].color.load(), tickets[id].number.load());
 #endif
 	}
 
@@ -427,63 +433,6 @@ public:
 	}
 };
 
-// struct Set
-// {
-// 	int size;
-// 	std::vector<int> members;
-
-// 	Set(){}
-
-// 	Set(int n): size(n)
-// 	{
-// 		members = std::vector<int>(size, -1);
-// 	}
-// 	Set(std::vector<int> vec): members(vec)
-// 	{
-// 		size = members.size();
-// 	}
-// 	~Set()
-// 	{
-// 	}
-
-// 	bool join(int tid)
-// 	{
-// 		for(int i=0; i<size; i++)
-// 		{
-// 			if (members[i] != 0) 
-// 			{
-// 				members[i] = tid;
-// 				return true; //successfully added
-// 			}
-// 		}
-// 		return false; //couldn't add because full ???
-// 	}
-
-// 	int leave(int tid)
-// 	{
-// 		for(int i=0; i<size; i++)
-// 		{
-// 			if (members[i] == tid) 
-// 			{
-// 				members[i] = -1;
-// 				return tid; //successfully left
-// 			}
-// 		}
-// 		return -1; //could not find tid in Set ???
-// 	}
-
-// 	std::vector<int> getset()
-// 	{
-// 		return members;
-// 	}
-
-// 	bool in(int j)
-// 	{
-// 		for(int i=0; i++;)
-// 	}
-// };
-
-
 class Taubenfeld_adaptive : public DW_Lock
 {
 protected:
@@ -492,8 +441,7 @@ protected:
 	BWTicket_atomic *tickets;
 	volatile bool inCS;
 	int size;
-	std::set<int> S;
-	//int fail;
+	std::vector<bool> S;
 
 public:
 	string name = "Taubenfeld_adaptive";
@@ -507,6 +455,7 @@ public:
 		tickets = new BWTicket_atomic[n];
 		choosing = new std::atomic <bool>[n];
 		lock_color = true;
+		S.assign(n, false);
 
 		for (int i = 0; i < n; i++)
 		{
@@ -514,17 +463,18 @@ public:
 			tickets[i].color = false;
 			tickets[i].number = 0;
 		}
-		printf("Tb adapt inited");
 	};
 	~Taubenfeld_adaptive()
 	{
+#ifdef DESKTOP
 		printf("Deleting %s...\n", name.c_str());
+#endif
 		delete[] choosing;
 		delete[] tickets;
 	};
 
 private:
-	virtual void take_ticket(int id, std::set<int> localS)
+	virtual void take_ticket(int id, std::vector<int> localS)
 	{
 		tickets[id].color = lock_color.load();
 		volatile int new_number = 0;
@@ -544,7 +494,7 @@ private:
 		tickets[id].number = 0; // Set ticket number to zero
 	}
 
-	bool keep_waiting(int id, std::set<int> localS)
+	bool keep_waiting(int id, std::vector<int> localS)
 	{
 		for (auto j : localS)
 		{
@@ -568,41 +518,61 @@ private:
 		return false;
 	}
 
+	std::vector<int> getLocalSet(std::vector<bool> Sview, int mytid)
+	{
+		int counter=0, tid=0;
+		std::vector<int> Sret(Sview.size(), -1);
+		for (auto i : Sview)
+		{
+			if (i && tid!=mytid) 
+			{
+				Sret[counter] = tid;
+				counter++;
+			}
+			tid++;
+		}
+		Sret.resize(counter);
+		return Sret;
+	}
+
 public:
 	void doorway()
 	{
 		//printf("dw");
 		int id = omp_get_thread_num();
-		S.insert(id);
+		S[id] = true;
 
 #ifdef LOCK_MSG
 		printf("thread %i TRIES to acquire the lock\n", id);
 #endif
 		choosing[id] = true;
-		std::set<int> localS = S;
-		localS.erase(id);
+		std::vector<int> localS = getLocalSet(S, id);
 		take_ticket(id, localS); // Ticket is colored inside function
 		choosing[id] = false;
 
 #ifdef LOCK_MSG
-		printf("(mycolor, number)[%i] = (%i, %i)\n", id, tickets[id].color, tickets[id].number);
+		printf("(mycolor, number)[%i] = (%i, %i)\n", id, tickets[id].color.load(), tickets[id].number.load());
 #endif
 	}
 
 	void wait()
 	{
 		int id = omp_get_thread_num();
-		std::set<int> localS = S;
-		localS.erase(id);
+		std::vector<int> localS = getLocalSet(S, id);
 
 		for (auto j : localS)
 		{
-
+#ifdef LOCK_MSG
+		printf("thread %i checking CHOOSING[%i] the lock\n", id, j);
+#endif
 			while (choosing[j])
 			{
 			} // wait until it is done choosing
 			if (tickets[j].color == tickets[id].color)
 			{
+#ifdef LOCK_MSG
+		printf("thread %i checking j=%i (same color) the lock\n", id, j);
+#endif
 				// while (! (tickets[j].number == 0 || lex_geq(tickets[j].color, tickets[j].number, tickets[id].color, tickets[id].number) || tickets[j].color != tickets[id].color) )
 				while (!(tickets[j].number == 0 || lex_geq(tickets[j].color.load(), tickets[j].number.load(), j, tickets[id].color.load(), tickets[id].number.load(), id) || tickets[j].color.load() != tickets[id].color.load()))
 				{ /*wait*/
@@ -610,6 +580,9 @@ public:
 			}
 			else
 			{
+#ifdef LOCK_MSG
+		printf("thread %i checking j=%i (different color) the lock\n", id, j);
+#endif
 				while (!(tickets[j].number.load() == 0 || tickets[id].color.load() != lock_color || tickets[j].color.load() == tickets[id].color.load()))
 				{ /*wait*/
 				}
@@ -619,9 +592,9 @@ public:
 		// {
 		// }
 		inCS = true;
-		//#ifdef LOCK_MSG
-		//printf("thread %i ACQUIRES the lock\n", id);
-		//#endif
+#ifdef LOCK_MSG
+		printf("thread %i ACQUIRES the lock\n", id);
+#endif
 	}
 
 	void lock()
@@ -633,12 +606,15 @@ public:
 	void unlock()
 	{
 		int id = omp_get_thread_num();
+#ifdef LOCK_MSG
+		printf("thread %i ACQUIRES the lock\n", id);
+#endif
 		if (tickets[id].color == false)
 			lock_color = true;
 		else
 			lock_color = false;
 		reset_ticket(id);
-		S.erase(id);
+		S[id] = false;
 		inCS = false;
 	}
 };

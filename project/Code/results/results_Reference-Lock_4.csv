@@ -1,2 +1,2 @@
 lock_name;num_threads;num_turns;num_tests;num_events;mutex_fail_count;fcfs_fail_count;lru_fail_count;thp_runtime_wanc;thp_wanc;anc;thp_runtime_ref;thp_ref;bm_runtime
-Reference-Lock;4;20000;1;320000;0;70793;46301;0.0396602;2.01714e+06;1.78759;0.0335883;2.38178e+06;1.32632
+Reference-Lock;4;20000;1;320000;0;0;0;0.204944;390350;0;0.201639;396749;9.00863

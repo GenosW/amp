@@ -87,7 +87,7 @@ int main(int argc, char *argv[]){
 	//// --- Lamport
 	//Lamport_Lecture my_lock {num_threads};
 	// Lamport_Lecture_fix my_lock{ num_threads };
-	Lamport_Lecture_atomic my_lock{ num_threads };
+	// Lamport_Lecture_atomic my_lock{ num_threads };
 	//Lamport_Original my_lock{ num_threads };
 
 	//// --- Taubenfeld
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]){
 	//Jayanti_BT my_lock{ num_threads };
 
 	// C++ Reference Lock	
-	// Reference_Lock my_lock;
+	Reference_Lock my_lock;
 
 	////--------------- RESULTS ---------------////
 	int mutex_fail_count, fcfs_fail_count, lru_fail_count;

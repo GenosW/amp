@@ -52,7 +52,9 @@ public:
 
 	~Reference_Lock()
 	{
+#ifdef DESKTOP
 		printf("Deleting %s...\n", name.c_str());
+#endif
 	}
 
 public:

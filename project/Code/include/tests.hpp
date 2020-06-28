@@ -676,7 +676,6 @@ int test_mutex(Lock* test_lock, int num_threads,
 	int counter = 0;
 	// an event is acquisition of a lock or unlocking
 	int num_events = num_threads * num_turns * 2;
-	printf("Num_events: %d", num_events);
 	int* event_log = new int[num_events];
 
 	//initialize logging array
@@ -1099,7 +1098,7 @@ double avg_num_contenders(int* event_log, int num_threads, int num_turns) {
 
 
 
-void throughput(DW_Lock* test_lock, double* result, int num_threads,
+double throughput(DW_Lock* test_lock, double* result, int num_threads,
 	int num_turns, int workload, int cs_workload, double randomness,
 	bool det_anc=true) {
 	// this measures throughput
@@ -1148,10 +1147,15 @@ void throughput(DW_Lock* test_lock, double* result, int num_threads,
 	
 	// evaluate event_log for average number of contenders
 	//-------------------------------------------------------
+	double anc_eval_time=0.0;
 	if (det_anc){
+		anc_eval_time = omp_get_wtime();
 		result[2] = avg_num_contenders(event_log, num_threads, num_turns);
+		
+		anc_eval_time = omp_get_wtime() - anc_eval_time;
 	}
 	else result[2] = -1;
+	return anc_eval_time;
 }
 
 
