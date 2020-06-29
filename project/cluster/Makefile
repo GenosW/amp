@@ -1,5 +1,5 @@
 CC := g++ # This is the main compiler
-#CC := clang #--analyze
+# CC := clang #--analyze
 SRCDIR := source
 BUILDDIR := build
 PROG = project2
@@ -9,23 +9,9 @@ TARGET := $(BINDIR)/$(PROG)
 SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
-CFLAGS :=  -Wall -std=c++11 -Xpreprocessor -fopenmp -g #-fopenmp #-g # 
-LIB := -lomp #-fopenmp # for MAC: -lomp
-INC := -I./include #-I"$(brew --prefix libomp)/include" -L"$(brew --prefix libomp)/lib" # for MAC: -I/usr/local/Cellar/libomp/9.0.0/include/
-
-# Quick summary on flags and command line options:
-# -Wall: enable "all" warning (not really all...)
-# -std=c++11 : set 
-# -Xpreprocessor : enable preprocessor...think only needed for mac, but no problem with linux
-# - g : enable debugging output... so you can work with debugger
-# -fopenmp : enable OMP library
-# MAC/Clang:
-# -lomp : instead of -fopenmp
-# no -g
-
-#$(TARGET): $(OBJECTS)
-#	@echo " Linking..."
-#	@echo " $(CC) $^ -o $(TARGET) $(LIB)"; $(CC) $^ -o $(TARGET) $(LIB)
+CFLAGS :=  -Wall -std=c++11 -Xpreprocessor -fopenmp -g
+LIB := -fopenmp # for MAC: -lomp
+INC := -I./include
 
 main: build/main.o
 	@echo " Linking..."
