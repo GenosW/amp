@@ -52,3 +52,9 @@ bm_reference... Reference_lock_
 bm_taubenfeld... Taubenfeld_atomic
 
 They can be built via e.g. "make bm_aravind", and will produce a binary with the respective name in the "/bin" folder. They use the same calling signature as above.
+
+### plot.ipynb
+
+The notebook will process all csv-files within the "results" subfolder of "results" ("results/results/*") into one csv-file per benchmark (set of parameters as above) and put them into "results/." (NOT "results/results/."). (Function split_csv).
+
+These seperated csv-files ("results/.") are then further processed via the function "eval_csv" and merged together into one dataframe containing the mean, std, min and max values for each measurement. Each measurement (throughput, runtime, etc.) is saved per test (we used 30 tests per benchmark), so e.g. the mean is calculated across these 30 tests (=1 benchmark).
