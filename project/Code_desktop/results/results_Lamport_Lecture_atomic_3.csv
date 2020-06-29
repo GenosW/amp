@@ -1,2 +1,0 @@
-lock_name;num_threads;num_turns;num_tests;num_events;mutex_fail_count;fcfs_fail_count;lru_fail_count;thp_runtime_wanc;thp_wanc;anc;thp_runtime_ref;thp_ref;bm_runtime
-Lamport_Lecture_atomic;3;100;1;1200;0;-1;-1;0.000239849;1.25079e+06;0.996667;0.00018096;1.65783e+06;0.00139093

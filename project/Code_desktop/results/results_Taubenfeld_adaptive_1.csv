@@ -1,2 +1,0 @@
-lock_name;num_threads;num_turns;num_tests;num_events;mutex_fail_count;fcfs_fail_count;lru_fail_count;thp_runtime_wanc;thp_wanc;anc;thp_runtime_ref;thp_ref;bm_runtime
-Taubenfeld_adaptive;1;200;1;800;0;0;0;0.0004293;465875;0;0.0003775;529801;0.0039302
