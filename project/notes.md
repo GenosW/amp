@@ -144,3 +144,84 @@ Make all benchmarks:
 ```shell
 make bm_aravind && make bm_jayanti && make bm_lamport && make bm_taubenfeld && make bm_reference
 ```
+
+| => ./bin/project2 4 10000 10 1000 10000 0.3
+OMP engaged!
+Testing OMP:
+Max num threads = 8
+
+Testing lock 2: Taubenfeld_Paper_1_atomic
+Performing mutex test: 1
+Performing FCFS test: 1
+num_threads = 4
+num_turns = 10000
+num_tests = 10
+num_events = 160000
+randomness = 0.300000
+
+######################
+#     MUTEX TEST     #
+######################
+
+Passed: 1
+
+----------------------
+
+######################
+#      FCFS TEST     #
+######################
+
+Passed: 1
+
+----------------------
+
+######################
+#       LRU TEST     #
+######################
+
+Passed: 1
+
+######################
+#     THROUGHPUT     #
+######################
+
+designated throughput test
+---------------------------------------------------
+runtime (s) = 4.5996
+throughput (acq/s) = 8696.3158
+average number of "other" contenders (#thr) = 2.0006
+average number of contenders (#thr) = 3.0006
+> Average time elapsed (s) = 4.601
+> Average anc eval time (s) = 0.004
+
+time measurement from record_event_log (no logging)
+---------------------------------------------------
+> Average time elapsed = 4.594702 s
+
+----------------------
+
+######################
+#       RESUMÉ       #
+######################
+
+Benchmark parameters:
+Lock name (attribute): Taubenfeld_Paper_1_atomic
+num_threads = 4
+num_turns = 10000
+num_tests = 10
+num_events = 160000
+randomness = 0.300000
+
+Benchmark results:
+mutex_fail_count = 0
+fcfs_fail_count = 0
+lru_fail_count = 0
+runtime (s) = 4.5996
+throughput (acq/s) = 8696.3158
+average number of "other" contenders (#thr) = 2.0006
+average number of contenders (#thr) = 3.0006
+Total benchmark runtime (min:sec:msecs) = 1:44:998
+Total benchmark runtime (sec) = 105.00
+
+
+Garbage collection...
