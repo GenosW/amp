@@ -20,12 +20,6 @@ lock, simple test-and-test-and-set lock
 * Challenge: Memory behavior. Ensure that memory (register)
 updates become visible in required order!
 
-## 1) Lamport's Bakery
-
-A mutual exclusion with stronger fairness guarantees (firstcome-first-served, FIFO, …)
-
-Idea: Take a ticket that is larger than the ones already in the bakery (or having been served); wait until my ticket is smallest.
-
 ## Plots
 
 - throughput/num_threads (*4) *num_workloads
@@ -93,4 +87,60 @@ Copy:
 
 ```shell
 ./bin/project2 2 1000 10 400 4000 0.1 && ./bin/project2 3 680 10 400 4000 0.1 && ./bin/project2 4 500 10 400 4000 0.1 && ./bin/project2 5 200 10 400 4000 0.1 && ./bin/project2 6 150 10 400 4000 0.1 && ./bin/project2 7 100 10 400 4000 0.1 && ./bin/project2 8 50 10 400 4000 0.1
+```
+
+## Benchmarks on cluster
+
+Focused on Throughput
+
+-) Aravind_fix
+-) Lamport_Lecture_atomic
+-) Jayanti_BT
+-) Taubenfeld_atomic
+-) Reference
+
+Parameters mäßig hätt ich mir mal folgende gedacht:
+num_threads = [2,3,4, 8, 16, 32, 64]
+(workload, cs_workload) = ([100, 1000], [1000, 100])
+randomness = 0.4
+num_tests = 30
+num_turns = ?
+
+Einmal:
+0,0,0 (wl,cswl,rand)
+
+
+```shell
+srun -p q_student --time=5:00 -N 1 -c 64 ./bin/bm_aravind 2 1000 30 100 1000 0.4
+srun -p q_student --time=5:00 -N 1 -c 64 ./bin/bm_aravind 3 1000 30 100 1000 0.4
+srun -p q_student --time=5:00 -N 1 -c 64 ./bin/bm_aravind 4 1000 30 100 1000 0.4
+srun -p q_student --time=5:00 -N 1 -c 64 ./bin/bm_aravind 8 1000 30 100 1000 0.4
+srun -p q_student --time=5:00 -N 1 -c 64 ./bin/bm_aravind 16 1000 30 100 1000 0.4
+srun -p q_student --time=5:00 -N 1 -c 64 ./bin/bm_aravind 32 1000 30 100 1000 0.4
+srun -p q_student --time=5:00 -N 1 -c 64 ./bin/bm_aravind 64 1000 30 100 1000 0.4
+```
+
+Copy cluster folder
+
+```shell
+scp -r cluster nebula:~/cluster
+scp -r jobs nebula:~/cluster/jobs
+```
+
+File:
+
+```shell
+scp nebula:~/cluster/results/aravind.csv cluster/results/aravind.csv
+```
+
+Folder:
+
+```shell
+scp -r nebula:~/cluster/results results
+```
+
+Make all benchmarks:
+
+```shell
+make bm_aravind && make bm_jayanti && make bm_lamport && make bm_taubenfeld && make bm_reference
 ```

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#SBATCH -p q_student
+#SBATCH -N 1
+#SBATCH -c 64
+# SBATCH --cpu-freq=High
+#SBATCH --time=5:00
+#SBATCH --output=results/aravind_100.csv
+
+./bin/bm_aravind 2 1000 30 100 1000 0.4
+./bin/bm_aravind 3 1000 30 100 1000 0.4
+./bin/bm_aravind 4 1000 30 100 1000 0.4
+./bin/bm_aravind 8 1000 30 100 1000 0.4
+./bin/bm_aravind 16 1000 30 100 1000 0.4
+./bin/bm_aravind 32 1000 30 100 1000 0.4
+./bin/bm_aravind 64 1000 30 100 1000 0.4
