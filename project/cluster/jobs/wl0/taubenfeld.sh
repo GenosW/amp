@@ -7,10 +7,10 @@
 #SBATCH --time=5:00
 #SBATCH --output=results/taubenfeld_0.csv
 
-./bin/bm_taubenfeld 2 5000 30 0 0 0.4
-./bin/bm_taubenfeld 3 5000 30 0 0 0.4
-./bin/bm_taubenfeld 4 5000 30 0 0 0.4
-./bin/bm_taubenfeld 8 5000 30 0 0 0.4
-./bin/bm_taubenfeld 16 5000 30 0 0 0.4
-./bin/bm_taubenfeld 32 5000 30 0 0 0.4
-./bin/bm_taubenfeld 64 5000 30 0 0 0.4
+./bin/bm_taubenfeld 2 1000 30 0 0 0.4
+./bin/bm_taubenfeld 3 1000 30 0 0 0.4
+./bin/bm_taubenfeld 4 1000 30 0 0 0.4
+./bin/bm_taubenfeld 8 1000 30 0 0 0.4
+./bin/bm_taubenfeld 16 1000 30 0 0 0.4
+./bin/bm_taubenfeld 32 1000 30 0 0 0.4
+./bin/bm_taubenfeld 64 1000 30 0 0 0.4

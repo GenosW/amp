@@ -10,7 +10,7 @@ SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 CFLAGS :=  -Wall -std=c++11 -Xpreprocessor -fopenmp -g #-fopenmp #-g # 
-LIB := -fopenmp # for MAC: -lomp
+LIB := -lomp #-fopenmp # for MAC: -lomp
 INC := -I./include #-I"$(brew --prefix libomp)/include" -L"$(brew --prefix libomp)/lib" # for MAC: -I/usr/local/Cellar/libomp/9.0.0/include/
 
 # Quick summary on flags and command line options:

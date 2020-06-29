@@ -19,7 +19,7 @@
 //#define DEBUG
 // compiler switch for more console output (usually only on desktop)
 #define DESKTOP
-#define CLUSTER
+// #define CLUSTER
 #ifdef CLUSTER
 	#undef DESKTOP
 #endif
@@ -87,12 +87,12 @@ int main(int argc, char *argv[]){
 	//// --- Lamport
 	//Lamport_Lecture my_lock {num_threads};
 	// Lamport_Lecture_fix my_lock{ num_threads };
-	Lamport_Lecture_atomic my_lock{ num_threads };
+	// Lamport_Lecture_atomic my_lock{ num_threads };
 	//Lamport_Original my_lock{ num_threads };
 
 	//// --- Taubenfeld
 	// Taubenfeld my_lock{num_threads};
-	// Taubenfeld_atomic my_lock{num_threads};
+	Taubenfeld_atomic my_lock{num_threads};
 	// Taubenfeld_adaptive my_lock{num_threads};
 
 	//// --- Aravind

@@ -7,12 +7,12 @@
 #SBATCH --time=5:00
 #SBATCH --output=results/reference_0_2.csv
 
-# ./bin/bm_reference 2 5000 30 0 0 0.4
-# ./bin/bm_reference 3 5000 30 0 0 0.4
-# ./bin/bm_reference 4 5000 30 0 0 0.4
-# ./bin/bm_reference 8 5000 30 0 0 0.4
+# ./bin/bm_reference 2 1000 30 0 0 0.4
+# ./bin/bm_reference 3 1000 30 0 0 0.4
+# ./bin/bm_reference 4 1000 30 0 0 0.4
+# ./bin/bm_reference 8 1000 30 0 0 0.4
 
-./bin/bm_reference 16 5000 30 0 0 0.4
-./bin/bm_reference 32 5000 30 0 0 0.4
+./bin/bm_reference 16 1000 30 0 0 0.4
+./bin/bm_reference 32 1000 30 0 0 0.4
 
-# ./bin/bm_reference 64 5000 30 0 0 0.4
+# ./bin/bm_reference 64 1000 30 0 0 0.4

@@ -13,4 +13,4 @@
 # ./bin/bm_reference 8 1000 30 1000 100 0.4
 # ./bin/bm_reference 16 1000 30 1000 100 0.4
 # ./bin/bm_reference 32 1000 30 1000 100 0.4
-./bin/bm_reference 64 1000 30 1000 100 0.4
+./bin/bm_reference 64 500 30 1000 100 0.4

@@ -518,7 +518,7 @@ private:
 		return false;
 	}
 
-	std::vector<int> getLocalSet(std::vector<bool> Sview, int mytid)
+	std::vector<int> getLocalSet(std::vector<bool>& Sview, int mytid)
 	{
 		int counter=0, tid=0;
 		std::vector<int> Sret(Sview.size(), -1);
